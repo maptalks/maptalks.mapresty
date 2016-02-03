@@ -8,8 +8,7 @@ var minimist = require('minimist'),
   jshint = require('gulp-jshint'),
   gzip   = require('gulp-gzip'),
   rename = require('gulp-rename'),
-  uglify = require('gulp-uglify'),
-  cssnano = require('gulp-cssnano');
+  uglify = require('gulp-uglify');
 var Server = require('karma').Server;
 
 
@@ -24,13 +23,10 @@ var knownOptions = {
 
 var options = minimist(process.argv.slice(2), knownOptions);
 
-var sources = require('./build/getFiles.js').getFiles(),
-    styles = './assets/css/**/*.css';
-
 gulp.task('scripts', function() {
-  return gulp.src(sources)
+  return gulp.src('src/**/*.js')
       .pipe(jshint())                 // do special things to the changed files...
-      .pipe(concat('layertalks.js'))         // do things that require all files
+      .pipe(concat('maptalks.js'))         // do things that require all files
       .pipe(header('(function () {\n')) // e.g. jshinting ^^^
       .pipe(footer('\n})();'))          // and some kind of module wrapping
       .pipe(gulp.dest('./dist'))
@@ -41,22 +37,12 @@ gulp.task('scripts', function() {
       .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('styles',function() {
-   return gulp.src(styles)
-        .pipe(concat('layertalks.css'))
-        .pipe(cssnano())
-        .pipe(gulp.dest('./dist'));
-});
 
-
-gulp.task('build',['scripts','styles'],function() {
-  return gulp.src('./assets/images/**/*')
-    .pipe(gulp.dest('./dist/images'));
+gulp.task('build',['scripts'],function() {
 });
 
 gulp.task('watch', ['build'], function () {
-  var scriptWatcher = gulp.watch(['src/**/*.js', './gulpfile.js','build/srcList.txt'], ['scripts']); // watch the same files in our scripts task
-  var stylesWatcher = gulp.watch(styles, ['styles']);
+  var scriptWatcher = gulp.watch(['src/**/*.js', './gulpfile.js'], ['scripts']); // watch the same files in our scripts task
 });
 
 var coveralls = require('gulp-coveralls');
