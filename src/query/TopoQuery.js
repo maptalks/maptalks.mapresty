@@ -39,10 +39,9 @@ Z.Util.extend(Z.TopoQuery.prototype, {
      * @member maptalks.Map
      * @param {[maptalks.Geometry]} [geometry] [做缓冲的geometry]
      * @param {Number} distance 缓冲距离，单位为米
-     * @param {Function} callback 计算完成后的回调函数，参数为返回的图形对象
      * @expose
      */
-    buffer:function(opts) {
+    buffer:function(opts, callback) {
         var geometries=opts['geometries'], distance=opts['distance'];
         if (!Z.Util.isArrayHasData(geometries) || !Z.Util.isNumber(distance)) {
             throw new Error('invalid parameters');
@@ -88,7 +87,7 @@ Z.Util.extend(Z.TopoQuery.prototype, {
                 }
                 buffered.push(r);
             }
-            opts['success'](buffered);
+            callback(null,buffered);
         } else {
             var url ='http://'+this.getHost()+"/enginerest/geometry/analysis/buffer";
             var queryString = formQueryString();
@@ -96,9 +95,7 @@ Z.Util.extend(Z.TopoQuery.prototype, {
                     resultText) {
                 var result = Z.Util.parseJSON(resultText);
                 if (!result["success"]) {
-                    if (opts['error']) {
-                        opts['error'](result);
-                    }
+                    callback(result);
                     return;
                 }
                 var svrBuffered = Z.GeoJSON.fromGeoJSON(result["data"]);
@@ -115,7 +112,7 @@ Z.Util.extend(Z.TopoQuery.prototype, {
                     }
                     buffered.push(g);
                 }
-                opts['success'](buffered);
+                callback(null, buffered);
             });
             ajax.post();
         }
@@ -130,7 +127,7 @@ Z.Util.extend(Z.TopoQuery.prototype, {
      * @param {Function} success 回调函数，参数为布尔类型数组，数组长度与geometries参数数组相同，每一位代表相应的判断结果
      * @expose
      */
-    relate:function(opts) {
+    relate:function(opts, callback) {
         var source = opts['source'],
             targets = opts['targets'],
             relation = opts['relation'];
@@ -159,12 +156,10 @@ Z.Util.extend(Z.TopoQuery.prototype, {
                 resultText) {
             var result = Z.Util.parseJSON(resultText);
             if (!result["success"]) {
-                if (opts['error']) {
-                    opts['error'](result);
-                }
+                callback['error'](result);
                 return;
             } else {
-                opts['success'](result['data']);
+                callback(null, result['data']);
             }
         });
         ajax.post();

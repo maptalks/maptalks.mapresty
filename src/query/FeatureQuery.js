@@ -46,7 +46,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
      * @return 查询结果
      * @expose
      */
-    identify:function(opts) {
+    identify:function(opts, callback) {
         if (!opts) {
             return;
         }
@@ -66,7 +66,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
         opts['queryFilter']=queryFilter;
         opts['page'] = 0;
         opts['count'] = 1;
-        this.query(opts);
+        this.query(opts, callback);
     },
 
     /**
@@ -74,7 +74,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
      * @param  {Object} opts 查询参数
      * @expose
      */
-    query:function(opts) {
+    query:function(opts, callback) {
         if (!opts || !this.check()) {
             throw new Error('invalid options for FeatureQuery\'s query method.');
         }
@@ -95,9 +95,6 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
                 segs[i] = segs[i].replace(/(^\s*)|(\s*$)/g,'');
             }
             layer = segs.join(',');
-        }
-        if (!Z.Util.isFunction(opts['success'])) {
-            throw new Error('success callback function is not specified in query options.');
         }
         //•/databases/{db}/layers/{id}/data?op=query
         var url='http://'+this.getHost()+"/enginerest/rest/databases/"+this.mapdb+"/layers/"+layer+"/data?op=query";
@@ -120,7 +117,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
             if (!response) {
                 //20000是未知错误的错误代码
                 if (Z.Util.isFunction(opts['error'])) {
-                    opts['error']({"success":false,"errCode":Z.Constant.ERROR_CODE_UNKNOWN,"error":""});
+                    callback({"success":false,"errCode":Z.Constant.ERROR_CODE_UNKNOWN,"error":""});
                 }
                 return;
             } else {
@@ -128,16 +125,15 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
                 if (!result) {
                     //20000是未知错误的错误代码
                     if (Z.Util.isFunction(opts['error'])) {
-                        opts['error']({"success":false,"errCode":Z.Constant.ERROR_CODE_UNKNOWN,"error":""});
+                        callback({"success":false,"errCode":Z.Constant.ERROR_CODE_UNKNOWN,"error":""});
                     }
                 } else if (!result["success"]) {
-                    if (Z.Util.isFunction(opts['error'])) {
-                        opts['error'](result);
-                    }
+                    callback(result);
+
                 } else {
                     var datas=result["data"];
                     if (!Z.Util.isArrayHasData(datas)) {
-                        opts['success']([]);
+                        callback(null,[]);
                     } else {
                         var i, len;
                         var collections = [];
@@ -149,7 +145,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
                                 });
                             }
                             //不返回Geometry,直接返回属性数据
-                            opts['success'](collections);
+                            callback(null,collections);
                         } else {
                             for (i = 0, len=datas.length; i < len; i++) {
                                 collections.push({
@@ -158,7 +154,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
                                 });
                             }
                             //不返回Geometry,直接返回属性数据
-                            opts['success'](collections);
+                            callback(null,collections);
                         }
                     }
                 }

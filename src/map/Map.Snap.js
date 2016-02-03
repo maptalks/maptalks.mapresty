@@ -5,7 +5,7 @@ Z.Map.include({
      * @member maptalks.Map
      * @expose
      */
-    snap:function(options) {
+    snap:function(options, callback) {
         if (!options) {
             options = {
                 "extent"    : this.getExtent(),
@@ -59,12 +59,12 @@ Z.Map.include({
         var ajax = new Z.Util.Ajax(url, 0, JSON.stringify(snapConfig), function(responseText) {
             var result = JSON.parse(responseText);
             if (result['success']) {
-                if (options['success']) {
-                    options['success'](result);
+                if (callback) {
+                    callback(null, result);
                 }
             } else {
-                if (options['error']) {
-                    options['error'](result);
+                if (callback) {
+                    callback(result);
                 }
             }
         });
