@@ -4,7 +4,7 @@
  * @extends maptalks.Class
  * @author Maptalks Team
  */
-Z.TopoQuery=function(opts) {
+maptalks.TopoQuery=function(opts) {
     if (!opts) {
         return;
     }
@@ -12,13 +12,13 @@ Z.TopoQuery=function(opts) {
     this.port = opts['port'];
     if (!this.host || !this.port) {
         //默认采用js的服务地址作为查询地址
-        var url = new Z.Url(Z.prefix);
+        var url = new maptalks.Url(maptalks.prefix);
         this.host = url.getHost();
         this.port = url.getPort();
     }
 };
 
-Z.Util.extend(Z.TopoQuery.prototype, {
+maptalks.Util.extend(maptalks.TopoQuery.prototype, {
     //默认结果的symbol
     defaultSymbol : {
         'lineColor' : '#800040',
@@ -43,14 +43,14 @@ Z.Util.extend(Z.TopoQuery.prototype, {
      */
     buffer:function(opts, callback) {
         var geometries=opts['geometries'], distance=opts['distance'];
-        if (!Z.Util.isArrayHasData(geometries) || !Z.Util.isNumber(distance)) {
+        if (!maptalks.Util.isArrayHasData(geometries) || !maptalks.Util.isNumber(distance)) {
             throw new Error('invalid parameters');
         }
         var symbol = this.defaultSymbol;
         if (opts['symbol']) {
             symbol = opts['symbol'];
         }
-        if (!Z.Util.isArray(geometries)) {
+        if (!maptalks.Util.isArray(geometries)) {
             geometries = [geometries];
         }
         var i, len;
@@ -58,7 +58,7 @@ Z.Util.extend(Z.TopoQuery.prototype, {
         var targets = [];
         for (i = 0, len=geometries.length; i < len; i++) {
             var geometry = geometries[i];
-            if (!(geometry instanceof Z.Marker) && !(geometry instanceof Z.Circle)) {
+            if (!(geometry instanceof maptalks.Marker) && !(geometry instanceof maptalks.Circle)) {
                 var geoJSON = geometry.toGeoJSONGeometry();
                 targets.push(geoJSON);
             }
@@ -70,10 +70,10 @@ Z.Util.extend(Z.TopoQuery.prototype, {
         }
         function bufferPointOrCircle(p) {
             // 点和圆形的buffer不需通过服务器而直接进行计算
-            if (p instanceof Z.Marker) {
-                return new Z.Circle(p.getCoordinates(), distance);
-            } else if (p instanceof Z.Circle) {
-                return new Z.Circle(p.getCoordinates(), p.getRadius()+distance);
+            if (p instanceof maptalks.Marker) {
+                return new maptalks.Circle(p.getCoordinates(), distance);
+            } else if (p instanceof maptalks.Circle) {
+                return new maptalks.Circle(p.getCoordinates(), p.getRadius()+distance);
             }
             return null;
         }
@@ -91,18 +91,18 @@ Z.Util.extend(Z.TopoQuery.prototype, {
         } else {
             var url ='http://'+this.getHost()+"/enginerest/geometry/analysis/buffer";
             var queryString = formQueryString();
-            var ajax = new Z.Util.Ajax(url, 0, queryString, function(
+            var ajax = new maptalks.Util.Ajax(url, 0, queryString, function(
                     resultText) {
-                var result = Z.Util.parseJSON(resultText);
+                var result = maptalks.Util.parseJSON(resultText);
                 if (!result["success"]) {
                     callback(result);
                     return;
                 }
-                var svrBuffered = Z.GeoJSON.fromGeoJSON(result["data"]);
+                var svrBuffered = maptalks.GeoJSON.fromGeoJSON(result["data"]);
                 var tmpIndex = 0;
                 for (i = 0, len=geometries.length; i < len; i++) {
                     var g;
-                    if ((geometries[i] instanceof Z.Marker) || (geometries[i] instanceof Z.Circle)) {
+                    if ((geometries[i] instanceof maptalks.Marker) || (geometries[i] instanceof maptalks.Circle)) {
                         g = bufferPointOrCircle(geometries[i]);
                     } else {
                         g = svrBuffered[tmpIndex++];
@@ -123,7 +123,7 @@ Z.Util.extend(Z.TopoQuery.prototype, {
      * @member maptalks.Map
      * @param {maptalks.Geometry} [geometry] [被relate的Geometry]
      * @param {maptalks.Geometry[]} geometries 输入Geometry数组
-     * @param {Number} relation  空间关系，参考z.constant内的常量定义
+     * @param {Number} relation  空间关系，参考maptalks.constant内的常量定义
      * @param {Function} success 回调函数，参数为布尔类型数组，数组长度与geometries参数数组相同，每一位代表相应的判断结果
      * @expose
      */
@@ -131,10 +131,10 @@ Z.Util.extend(Z.TopoQuery.prototype, {
         var source = opts['source'],
             targets = opts['targets'],
             relation = opts['relation'];
-        if (targets && !Z.Util.isArray(targets)) {
+        if (targets && !maptalks.Util.isArray(targets)) {
             targets = [targets];
         }
-        if (!source || !Z.Util.isArrayHasData(targets) || !Z.Util.isNumber(opts['relation'])) {
+        if (!source || !maptalks.Util.isArrayHasData(targets) || !maptalks.Util.isNumber(opts['relation'])) {
             throw new Error('invalid parameters');
         }
 
@@ -152,9 +152,9 @@ Z.Util.extend(Z.TopoQuery.prototype, {
         }
         var url = 'http://'+this.getHost()+'/enginerest/geometry/relation';
         var queryString = formQueryString();
-        var ajax = new Z.Util.Ajax(url, 0, queryString, function(
+        var ajax = new maptalks.Util.Ajax(url, 0, queryString, function(
                 resultText) {
-            var result = Z.Util.parseJSON(resultText);
+            var result = maptalks.Util.parseJSON(resultText);
             if (!result["success"]) {
                 callback['error'](result);
                 return;

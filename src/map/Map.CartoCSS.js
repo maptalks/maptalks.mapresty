@@ -2,7 +2,7 @@
  * CartoCSS解析参考了CartoCSS.js
  * https://github.com/CartoDB/carto
  */
-Z.Map.mergeOptions({
+maptalks.Map.mergeOptions({
     /**
      * @cfg {Boolean} [enableCartoCSS="true"] 启用CartoCss
      * @member maptalks.Map
@@ -10,19 +10,19 @@ Z.Map.mergeOptions({
     'enableCartoCSS' : true
 });
 
-Z.Map.include({
+maptalks.Map.include({
     /**
      * 为地图载入CartoCSS样式
      * @param  {String|URL} css css样式或者mss文件链接
      * @member maptalks.Map
      */
     cartoCSS:function(css) {
-        if (!Z.Util.isString(css) || css.length===0) {
+        if (!maptalks.Util.isString(css) || css.length===0) {
             return;
         }
         if (!window['carto']) {
             //载入carto.js
-           Z.loadModule('carto',function() {
+           maptalks.loadModule('carto',function() {
                 this._loadCartoCSS(css);
            },this);
         } else {
@@ -35,7 +35,7 @@ Z.Map.include({
         var suffix = '.mss';
         var isMss=css.indexOf(suffix, css.length - suffix.length) !== -1;
         if (isMss) {
-            Z.Util.Ajax.getResource(css,function(resource) {
+            maptalks.Util.Ajax.getResource(css,function(resource) {
                 this._rendCartoCSS(resource);
             },this);
         } else {

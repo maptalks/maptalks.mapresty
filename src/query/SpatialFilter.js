@@ -6,12 +6,12 @@
  * @param {Number} relation
  * @author Maptalks Team
  */
-Z.SpatialFilter=function(geometry, relation) {
+maptalks.SpatialFilter=function(geometry, relation) {
     this.geometry = geometry;
     this.relation = relation;
 };
 
-Z.Util.extend(Z.SpatialFilter.prototype,{
+maptalks.Util.extend(maptalks.SpatialFilter.prototype,{
     /**
      * 获取SpatialFilter中的geometry
      * @return {maptalks.Geometry} SpatialFilter的Geometry
@@ -28,7 +28,7 @@ Z.Util.extend(Z.SpatialFilter.prototype,{
      */
     toJSON: function() {
         var geojson = this.geometry;
-        if (this.geometry instanceof Z.Geometry) {
+        if (this.geometry instanceof maptalks.Geometry) {
             geojson = this.geometry.toGeoJSONGeometry();
         }
         var jsonObj = {
@@ -40,7 +40,7 @@ Z.Util.extend(Z.SpatialFilter.prototype,{
 
 });
 
-Z.Util.extend(Z.SpatialFilter,{
+maptalks.Util.extend(maptalks.SpatialFilter,{
     /**
      * @static
      * @property {Number} RELATION_INTERSECT 相交

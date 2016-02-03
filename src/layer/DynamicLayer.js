@@ -1,4 +1,4 @@
-Z['DynamicLayer'] = Z.DynamicLayer = Z.TileLayer.extend({
+maptalks.DynamicLayer = maptalks.TileLayer.extend({
     type: 'dynamic',
 
     //瓦片图层的基础ZIndex
@@ -7,8 +7,8 @@ Z['DynamicLayer'] = Z.DynamicLayer = Z.TileLayer.extend({
     options: {
         baseUrl: '',
         format: 'png',
-        // inputCRS: Z.CRS.createProj4('+proj=longlat +datum=GCJ02'),
-        resultCRS: Z.CRS.createProj4('+proj=merc +datum=GCJ02'),
+        // inputCRS: maptalks.CRS.createProj4('+proj=longlat +datum=GCJ02'),
+        resultCRS: maptalks.CRS.createProj4('+proj=merc +datum=GCJ02'),
         showOnTileLoadComplete: false
         // mapdb: '',
         // layers: [{name: 'name', condition: '', spatialFilter: {}, cartocss: '', cartocss_version: ''}]
@@ -16,7 +16,7 @@ Z['DynamicLayer'] = Z.DynamicLayer = Z.TileLayer.extend({
 
     initialize: function(id, opts) {
         this.setId(id);
-        Z.Util.setOptions(this, opts);
+        maptalks.Util.setOptions(this, opts);
         //reload时n会增加,改变瓦片请求参数,以刷新浏览器缓存
         this.n = 0;
     },
@@ -41,8 +41,8 @@ Z['DynamicLayer'] = Z.DynamicLayer = Z.TileLayer.extend({
         var me = this;
         var url = this.options.baseUrl;
         var queryString = this._formQueryString();
-        var ajax = new Z.Util.Ajax(url, 0, queryString, function(responseText) {
-            var result = Z.Util.parseJSON(responseText);
+        var ajax = new maptalks.Util.Ajax(url, 0, queryString, function(responseText) {
+            var result = maptalks.Util.parseJSON(responseText);
             if (result && result.hasOwnProperty('layergroupid')) {
                 me._token = result.layergroupid;
                 me._renderer.render(me.options.showOnTileLoadComplete);
@@ -106,8 +106,8 @@ Z['DynamicLayer'] = Z.DynamicLayer = Z.TileLayer.extend({
             if (this.options.resultCRS) {
                 q.resultCRS = this.options.resultCRS;
             } // else, result will be return in layer's CRS
-            if (l.spatialFilter && Z.Util.isObject(l.spatialFilter)) {
-                if (l.spatialFilter instanceof Z.SpatialFilter) {
+            if (l.spatialFilter && maptalks.Util.isObject(l.spatialFilter)) {
+                if (l.spatialFilter instanceof maptalks.SpatialFilter) {
                     q.spatialFilter = l.spatialFilter.toJSON();
                 } else {
                     q.spatialFilter = l.spatialFilter;

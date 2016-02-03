@@ -4,7 +4,7 @@
  * @extends maptalks.Class
  * @author Maptalks Team
  */
-Z.FeatureQuery=function(opts) {
+maptalks.FeatureQuery=function(opts) {
     if (!opts) {
         return;
     }
@@ -12,14 +12,14 @@ Z.FeatureQuery=function(opts) {
     this.port = opts['port'];
     if (!this.host || !this.port) {
         //默认采用js的服务地址作为查询地址
-        var url = new Z.Url(Z.prefix);
+        var url = new maptalks.Url(maptalks.prefix);
         this.host = url.getHost();
         this.port = url.getPort();
     }
     this.mapdb = opts['mapdb'];
 };
 
-Z.Util.extend(Z.FeatureQuery.prototype,{
+maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
 
     /**
      * 检查查询参数是否正常
@@ -52,7 +52,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
         }
         var coordinate = opts['coordinate'];
         var radius = opts["radius"];
-        var spatialFilter = new Z.SpatialFilter(new Z.Circle(coordinate, radius), Z.SpatialFilter.RELATION_INTERSECT);
+        var spatialFilter = new maptalks.SpatialFilter(new maptalks.Circle(coordinate, radius), maptalks.SpatialFilter.RELATION_INTERSECT);
         var queryFilter = {
             'spatialFilter': spatialFilter,
             'condition': opts['condition']
@@ -86,9 +86,9 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
         if (!layer) {
             throw new Error('layer is not specified in query options.');
         }
-        if (Z.Util.isArrayHasData(layer)) {
+        if (maptalks.Util.isArrayHasData(layer)) {
             layer = layer.join(',');
-        } else if (Z.Util.isString(layer)) {
+        } else if (maptalks.Util.isString(layer)) {
             var segs = layer.split(',');
             //去掉图层名前后两端的空格, 如 foo1, foo2 , foo3 ----> foo1,foo2,foo3
             for (var i = segs.length - 1; i >= 0; i--) {
@@ -106,33 +106,33 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
             };
         }
         var queryString=this.formQueryString(queryFilter);
-        if (Z.Util.isNumber(opts['page'])) {
+        if (maptalks.Util.isNumber(opts['page'])) {
             queryString += "&page="+opts['page'];
         }
-        if (Z.Util.isNumber(opts['count'])){
+        if (maptalks.Util.isNumber(opts['count'])){
             queryString += "&count="+opts['count'];
         }
         //var beginTime=new Date().getTime();
-        var ajax = new Z.Util.Ajax(url,0,queryString,function(response){
+        var ajax = new maptalks.Util.Ajax(url,0,queryString,function(response){
             if (!response) {
                 //20000是未知错误的错误代码
-                if (Z.Util.isFunction(opts['error'])) {
-                    callback({"success":false,"errCode":Z.Constant.ERROR_CODE_UNKNOWN,"error":""});
+                if (maptalks.Util.isFunction(opts['error'])) {
+                    callback({"success":false,"errCode":maptalks.Constant.ERROR_CODE_UNKNOWN,"error":""});
                 }
                 return;
             } else {
-                var result = Z.Util.parseJSON(response);
+                var result = maptalks.Util.parseJSON(response);
                 if (!result) {
                     //20000是未知错误的错误代码
-                    if (Z.Util.isFunction(opts['error'])) {
-                        callback({"success":false,"errCode":Z.Constant.ERROR_CODE_UNKNOWN,"error":""});
+                    if (maptalks.Util.isFunction(opts['error'])) {
+                        callback({"success":false,"errCode":maptalks.Constant.ERROR_CODE_UNKNOWN,"error":""});
                     }
                 } else if (!result["success"]) {
                     callback(result);
 
                 } else {
                     var datas=result["data"];
-                    if (!Z.Util.isArrayHasData(datas)) {
+                    if (!maptalks.Util.isArrayHasData(datas)) {
                         callback(null,[]);
                     } else {
                         var i, len;
@@ -150,7 +150,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
                             for (i = 0, len=datas.length; i < len; i++) {
                                 collections.push({
                                     "layer" : datas[i]['layer'],
-                                    "features" : Z.GeoJSON.fromGeoJSON(datas[i]['features'])
+                                    "features" : maptalks.GeoJSON.fromGeoJSON(datas[i]['features'])
                                 });
                             }
                             //不返回Geometry,直接返回属性数据
@@ -182,7 +182,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
         if (queryFilter['resultCRS']) {
             ret+='&resultCrs='+encodeURIComponent(JSON.stringify(queryFilter['resultCRS']));
         }
-        if (!Z.Util.isNil(queryFilter['returnGeometry'])) {
+        if (!maptalks.Util.isNil(queryFilter['returnGeometry'])) {
             ret+='&returnGeometry='+queryFilter['returnGeometry'];
         }
         if (queryFilter['spatialFilter']) {
@@ -190,11 +190,11 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
             var filterGeo = spatialFilter['geometry'];
             if (filterGeo) {
                 var paramFilter;
-                if (spatialFilter instanceof Z.SpatialFilter) {
+                if (spatialFilter instanceof maptalks.SpatialFilter) {
                     paramFilter = spatialFilter.toJSON();
                 } else {
                     paramFilter = spatialFilter;
-                    if (filterGeo instanceof Z.Geometry) {
+                    if (filterGeo instanceof maptalks.Geometry) {
                         paramFilter['geometry'] = filterGeo.toGeoJSONGeometry();
                     }
                 }
@@ -207,7 +207,7 @@ Z.Util.extend(Z.FeatureQuery.prototype,{
         }
         if (queryFilter['resultFields']) {
             var fields = queryFilter['resultFields'];
-            if (Z.Util.isArray(fields)) {
+            if (maptalks.Util.isArray(fields)) {
                 fields = fields.join(',');
             }
             ret += ('&fields='+fields);

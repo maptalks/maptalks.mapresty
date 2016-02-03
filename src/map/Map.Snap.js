@@ -1,4 +1,4 @@
-Z.Map.include({
+maptalks.Map.include({
 	/**
      * 截图
      * @param  {Object} options 截图设置
@@ -24,12 +24,12 @@ Z.Map.include({
         if (host) {
             url = host+'/snapservice/';
         } else {
-            var prefixUrl = new Z.Url(Z.prefix);
+            var prefixUrl = new maptalks.Url(maptalks.prefix);
             var prefixHost = prefixUrl.getHost();
             var prefixPort = prefixUrl.getPort();
             url = 'http://'+ prefixHost + ':' + prefixPort + '/snapservice/';
         }
-        var profile = this.toJSON(Z.Util.extend({}, options['profile'], {'clipExtent':extent}));
+        var profile = this.toJSON(maptalks.Util.extend({}, options['profile'], {'clipExtent':extent}));
         profile['extent'] = extent;
         profile.options['zoom'] = zoom;
         var center = extent.getCenter();
@@ -38,8 +38,8 @@ Z.Map.include({
         //extra geometries to add to the snapping.
         var extraGeometries = options['extraGeometries'];
         if (extraGeometries) {
-            var extraLayer = new Z.VectorLayer(Z.Util.GUID());
-            if (Z.Util.isArrayHasData(extraGeometries)) {
+            var extraLayer = new maptalks.VectorLayer(maptalks.Util.GUID());
+            if (maptalks.Util.isArrayHasData(extraGeometries)) {
                 for (var i = 0, len=extraGeometries.length; i < len; i++) {
                     extraLayer.addGeometry(extraGeometries[i].copy());
                 }
@@ -56,7 +56,7 @@ Z.Map.include({
         };
         if (serverDir) {snapConfig['serverDir'] = serverDir;}
         if (serverFileName) {snapConfig['serverFileName'] = serverFileName;}
-        var ajax = new Z.Util.Ajax(url, 0, JSON.stringify(snapConfig), function(responseText) {
+        var ajax = new maptalks.Util.Ajax(url, 0, JSON.stringify(snapConfig), function(responseText) {
             var result = JSON.parse(responseText);
             if (result['success']) {
                 if (callback) {
