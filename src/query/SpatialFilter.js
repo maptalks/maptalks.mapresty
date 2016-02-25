@@ -6,9 +6,10 @@
  * @param {Number} relation
  * @author Maptalks Team
  */
-maptalks.SpatialFilter=function(geometry, relation) {
+maptalks.SpatialFilter=function(geometry, relation, crs) {
     this.geometry = geometry;
     this.relation = relation;
+    this.crs = crs;
 };
 
 maptalks.Util.extend(maptalks.SpatialFilter.prototype,{
@@ -33,7 +34,8 @@ maptalks.Util.extend(maptalks.SpatialFilter.prototype,{
         }
         var jsonObj = {
           "geometry": geojson,
-          "relation": this.relation
+          "relation": this.relation,
+          "crs":this.crs
         };
         return jsonObj;
     }

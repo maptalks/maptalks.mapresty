@@ -57,9 +57,6 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
             'spatialFilter': spatialFilter,
             'condition': opts['condition']
         };
-        if (opts['inputCRS']) {
-            queryFilter['inputCRS'] = opts['inputCRS'];
-        }
         if (opts['resultCRS']) {
             queryFilter['resultCRS'] = opts['resultCRS'];
         }
@@ -176,11 +173,8 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
         var ret = 'encoding=utf-8';
         //ret+="&method=add";
         ret+='&mapdb='+this.mapdb;
-        if (queryFilter['inputCRS']) {
-            ret+='&inputCrs='+encodeURIComponent(JSON.stringify(queryFilter['inputCRS']));
-        }
         if (queryFilter['resultCRS']) {
-            ret+='&resultCrs='+encodeURIComponent(JSON.stringify(queryFilter['resultCRS']));
+            ret+='&resultCRS='+encodeURIComponent(JSON.stringify(queryFilter['resultCRS']));
         }
         if (!maptalks.Util.isNil(queryFilter['returnGeometry'])) {
             ret+='&returnGeometry='+queryFilter['returnGeometry'];

@@ -26,7 +26,7 @@ var options = minimist(process.argv.slice(2), knownOptions);
 gulp.task('scripts', function() {
   return gulp.src('src/**/*.js')
       .pipe(jshint())                 // do special things to the changed files...
-      .pipe(concat('maptalks.js'))         // do things that require all files
+      .pipe(concat('maptalks.client.js'))         // do things that require all files
       .pipe(header('(function () {\n')) // e.g. jshinting ^^^
       .pipe(footer('\n})();'))          // and some kind of module wrapping
       .pipe(gulp.dest('./dist'))
