@@ -82,7 +82,10 @@ maptalks.Map.include({
                 }
             },
             snapConfig,
-            function (responseText) {
+            function (err, responseText) {
+                if (err) {
+                    throw err;
+                }
                 var result = JSON.parse(responseText);
                 if (callback) {
                     if (result['success']) {
