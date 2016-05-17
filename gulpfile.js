@@ -1,34 +1,20 @@
 'use strict';
 
-var minimist = require('minimist'),
-  gulp   = require('gulp'),
+var gulp   = require('gulp'),
   header = require('gulp-header'),
   footer = require('gulp-footer'),
   concat = require('gulp-concat'),
-  jshint = require('gulp-jshint'),
   gzip   = require('gulp-gzip'),
   rename = require('gulp-rename'),
-  uglify = require('gulp-uglify');
-var Server = require('karma').Server;
-
-
-var knownOptions = {
-  string: ['browsers', 'pattern'],
-  boolean: 'coverage',
-  alias: {
-    'coverage': 'cov'
-  },
-  default: { browsers: 'PhantomJS', coverage: false }
-};
-
-var options = minimist(process.argv.slice(2), knownOptions);
+  uglify = require('gulp-uglify'),
+  mocha  = require('gulp-mocha'),
+  Server = require('karma').Server;
 
 gulp.task('scripts', function() {
   return gulp.src('src/**/*.js')
-      .pipe(jshint())                 // do special things to the changed files...
-      .pipe(concat('maptalks.client.js'))         // do things that require all files
-      .pipe(header('(function () {\n')) // e.g. jshinting ^^^
-      .pipe(footer('\n})();'))          // and some kind of module wrapping
+      .pipe(concat('maptalks.mapresty.js'))
+      .pipe(header('(function () {\n\'use strict\';\n'))
+      .pipe(footer('\n})();'))
       .pipe(gulp.dest('./dist'))
       .pipe(rename({suffix: '.min'}))
       .pipe(uglify())
@@ -41,75 +27,18 @@ gulp.task('scripts', function() {
 gulp.task('build',['scripts'],function() {
 });
 
-gulp.task('watch', ['build'], function () {
-  var scriptWatcher = gulp.watch(['src/**/*.js', './gulpfile.js'], ['scripts']); // watch the same files in our scripts task
+gulp.task('watch', ['test'], function () {
+  var scriptWatcher = gulp.watch(['src/**/*.js', 'test/**/*.js','./gulpfile.js'], ['test']); // watch the same files in our scripts task
 });
 
-var coveralls = require('gulp-coveralls');
-gulp.task('coveralls', function () {
-  if (!process.env.CI) return;
-  return gulp.src('./coverage/**/lcov.info')
-    .pipe(coveralls());
-});
-
-var browsers = options.browsers.split(',');
-browsers = browsers.map(function(name) {
-  var lname = name.toLowerCase();
-  if (lname.indexOf('phantom') === 0) {
-    return 'PhantomJS';
-  }
-  if (lname[0] === 'i') {
-    return 'IE' + lname.substr(2);
-  } else {
-    return lname[0].toUpperCase() + lname.substr(1);
-  }
-});
-
-/**
- * Run test once and exit
- */
-gulp.task('test', function (done) {
+gulp.task('test', ['build'], function(done) {
+  gulp.src(['dist/maptalks.mapresty.js','test/*.js'], {read: false})
+        .pipe(mocha());
   var karmaConfig = {
     configFile: __dirname + '/karma.conf.js',
-    browsers:browsers,
+    browsers: ['PhantomJS'],
     singleRun: true
   };
-  if (options.coverage) {
-    karmaConfig.preprocessors = {
-      'src/!(maptalks)/**/!(Matrix|Promise).js': ['coverage']
-    };
-    karmaConfig.coverageReporter = {
-      type: 'lcov', // lcov or lcovonly are required for generating lcov.info files
-      dir: 'coverage/'
-    };
-    karmaConfig.reporters = ['coverage'];
-  };
-  if (options.pattern) {
-    karmaConfig.client = {
-      mocha: {
-        grep: options.pattern
-      }
-    };
-  };
-  new Server(karmaConfig, done).start();
-});
-
-/**
- * Watch for file changes and re-run tests on each change
- */
-gulp.task('tdd', function (done) {
-  var karmaConfig = {
-    configFile: __dirname + '/karma.conf.js',
-    browsers: browsers,
-    singleRun: false
-  };
-  if (options.pattern) {
-    karmaConfig.client = {
-      mocha: {
-        grep: options.pattern
-      }
-    };
-  }
   new Server(karmaConfig, done).start();
 });
 

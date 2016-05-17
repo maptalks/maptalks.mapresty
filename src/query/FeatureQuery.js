@@ -4,7 +4,7 @@
  * @extends maptalks.Class
  * @author Maptalks Team
  */
-maptalks.FeatureQuery=function(opts) {
+maptalks.FeatureQuery = function (opts) {
     if (!opts) {
         return;
     }
@@ -19,13 +19,13 @@ maptalks.FeatureQuery=function(opts) {
     this.mapdb = opts['mapdb'];
 };
 
-maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
+maptalks.Util.extend(maptalks.FeatureQuery.prototype, {
 
     /**
      * 检查查询参数是否正常
      * @return {Boolean} true|false
      */
-    check:function() {
+    check:function () {
         if (!this.mapdb) {
             return false;
         }
@@ -36,8 +36,8 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
      * 获取空间库主机地址
      * @return {String} 空间库主机地址
      */
-    getHost:function() {
-        return this.host+':'+this.port;
+    getHost:function () {
+        return this.host + ':' + this.port;
     },
 
     /**
@@ -46,12 +46,12 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
      * @return 查询结果
      * @expose
      */
-    identify:function(opts, callback) {
+    identify:function (opts, callback) {
         if (!opts) {
             return;
         }
         var coordinate = opts['coordinate'];
-        var radius = opts["radius"];
+        var radius = opts['radius'];
         var spatialFilter = new maptalks.SpatialFilter(new maptalks.Circle(coordinate, radius), maptalks.SpatialFilter.RELATION_INTERSECT);
         var queryFilter = {
             'spatialFilter': spatialFilter,
@@ -60,7 +60,7 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
         if (opts['resultCRS']) {
             queryFilter['resultCRS'] = opts['resultCRS'];
         }
-        opts['queryFilter']=queryFilter;
+        opts['queryFilter'] = queryFilter;
         opts['page'] = 0;
         opts['count'] = 1;
         this.query(opts, callback);
@@ -71,7 +71,7 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
      * @param  {Object} opts 查询参数
      * @expose
      */
-    query:function(opts, callback) {
+    query:function (opts, callback) {
         if (!opts || !this.check()) {
             throw new Error('invalid options for FeatureQuery\'s query method.');
         }
@@ -89,12 +89,12 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
             var segs = layer.split(',');
             //去掉图层名前后两端的空格, 如 foo1, foo2 , foo3 ----> foo1,foo2,foo3
             for (var i = segs.length - 1; i >= 0; i--) {
-                segs[i] = segs[i].replace(/(^\s*)|(\s*$)/g,'');
+                segs[i] = segs[i].replace(/(^\s*)|(\s*$)/g, '');
             }
             layer = segs.join(',');
         }
         //•/databases/{db}/layers/{id}/data?op=query
-        var url='http://'+this.getHost()+"/enginerest/rest/databases/"+this.mapdb+"/layers/"+layer+"/data?op=query";
+        var url = 'http://' + this.getHost() + '/rest/sdb/databases/' + this.mapdb + '/layers/' + layer + '/data?op=query';
         var queryFilter = opts['queryFilter'];
         if (!queryFilter) {
             //默认的queryFilter
@@ -102,65 +102,67 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
                 'fields':'*'
             };
         }
-        var queryString=this.formQueryString(queryFilter);
+        var postData = this.formQueryString(queryFilter);
         if (maptalks.Util.isNumber(opts['page'])) {
-            queryString += "&page="+opts['page'];
+            postData += '&page=' + opts['page'];
         }
-        if (maptalks.Util.isNumber(opts['count'])){
-            queryString += "&count="+opts['count'];
+        if (maptalks.Util.isNumber(opts['count'])) {
+            postData += '&count=' + opts['count'];
         }
-        //var beginTime=new Date().getTime();
-        var ajax = new maptalks.Util.Ajax(url,0,queryString,function(response){
-            if (!response) {
-                //20000是未知错误的错误代码
-                if (maptalks.Util.isFunction(opts['error'])) {
-                    callback({"success":false,"errCode":maptalks.Constant.ERROR_CODE_UNKNOWN,"error":""});
+
+        maptalks.Ajax.post(
+            {
+                url : url
+            },
+            postData,
+            function (err, response) {
+                if (err) {
+                    throw err;
                 }
-                return;
-            } else {
+                if (!response) {
+                    //20000是未知错误的错误代码
+                    if (maptalks.Util.isFunction(opts['error'])) {
+                        callback({'success':false, 'errCode':maptalks.Constant.ERROR_CODE_UNKNOWN, 'error':''});
+                    }
+                    return;
+                }
                 var result = maptalks.Util.parseJSON(response);
                 if (!result) {
                     //20000是未知错误的错误代码
                     if (maptalks.Util.isFunction(opts['error'])) {
-                        callback({"success":false,"errCode":maptalks.Constant.ERROR_CODE_UNKNOWN,"error":""});
+                        callback({'success':false, 'errCode':maptalks.Constant.ERROR_CODE_UNKNOWN, 'error':''});
                     }
-                } else if (!result["success"]) {
+                } else if (!result['success']) {
                     callback(result);
-
                 } else {
-                    var datas=result["data"];
+                    var datas = result['data'];
                     if (!maptalks.Util.isArrayHasData(datas)) {
-                        callback(null,[]);
+                        callback(null, []);
                     } else {
                         var i, len;
                         var collections = [];
-                        if (false === queryFilter['returnGeometry']) {
-                            for (i = 0, len=datas.length; i < len; i++) {
+                        if (queryFilter['returnGeometry'] === false) {
+                            for (i = 0, len = datas.length; i < len; i++) {
                                 collections.push({
-                                    "layer" : datas[i]['layer'],
-                                    "features" : datas[i]['features']
+                                    'layer' : datas[i]['layer'],
+                                    'features' : datas[i]['features']
                                 });
                             }
                             //不返回Geometry,直接返回属性数据
-                            callback(null,collections);
+                            callback(null, collections);
                         } else {
-                            for (i = 0, len=datas.length; i < len; i++) {
+                            for (i = 0, len = datas.length; i < len; i++) {
                                 collections.push({
-                                    "layer" : datas[i]['layer'],
-                                    "features" : maptalks.GeoJSON.fromGeoJSON(datas[i]['features'])
+                                    'layer' : datas[i]['layer'],
+                                    'features' : maptalks.GeoJSON.fromGeoJSON(datas[i]['features'])
                                 });
                             }
-                            //不返回Geometry,直接返回属性数据
-                            callback(null,collections);
+                            callback(null, collections);
                         }
                     }
                 }
             }
-
-            ajax = null;
-        });
-
-        ajax.post();
+        );
     },
 
     /**
@@ -169,15 +171,16 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
      * @return {String} 查询url
      * @expose
      */
-    formQueryString:function(queryFilter) {
-        var ret = 'encoding=utf-8';
-        //ret+="&method=add";
-        ret+='&mapdb='+this.mapdb;
+    formQueryString:function (queryFilter) {
+        var ret = [
+            'encoding=utf-8',
+            'mapdb=' + this.mapdb
+        ];
         if (queryFilter['resultCRS']) {
-            ret+='&resultCRS='+encodeURIComponent(JSON.stringify(queryFilter['resultCRS']));
+            ret.push('resultCRS=' + encodeURIComponent(JSON.stringify(queryFilter['resultCRS'])));
         }
         if (!maptalks.Util.isNil(queryFilter['returnGeometry'])) {
-            ret+='&returnGeometry='+queryFilter['returnGeometry'];
+            ret.push('returnGeometry=' + queryFilter['returnGeometry']);
         }
         if (queryFilter['spatialFilter']) {
             var spatialFilter = queryFilter['spatialFilter'];
@@ -192,20 +195,20 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype,{
                         paramFilter['geometry'] = filterGeo.toGeoJSONGeometry();
                     }
                 }
-                ret += ('&spatialFilter='+encodeURIComponent(JSON.stringify(paramFilter)));
+                ret.push('spatialFilter=' + encodeURIComponent(JSON.stringify(paramFilter)));
             }
 
         }
         if (queryFilter['condition']) {
-            ret += ('&condition='+encodeURIComponent(queryFilter['condition']));
+            ret.push('condition=' + encodeURIComponent(queryFilter['condition']));
         }
         if (queryFilter['resultFields']) {
             var fields = queryFilter['resultFields'];
             if (maptalks.Util.isArray(fields)) {
                 fields = fields.join(',');
             }
-            ret += ('&fields='+fields);
+            ret.push('fields=' + fields);
         }
-        return ret;
+        return ret.join('&');
     }
 });

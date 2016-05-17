@@ -1,0 +1,14 @@
+{
+  "extends": "maptalks",
+  "globals": {
+      "describe":true,
+      "it":true,
+      "Z" :true,
+      "expect":true,
+      "Ajax":true
+  },
+  "rules": {
+    "strict" : 0,
+    "global-require" : 0
+  }
+}

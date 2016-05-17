@@ -14,7 +14,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
         // layers: [{name: 'name', condition: '', spatialFilter: {}, cartocss: '', cartocss_version: ''}]
     },
 
-    initialize: function(id, opts) {
+    initialize: function (id, opts) {
         this.setId(id);
         maptalks.Util.setOptions(this, opts);
         //reload时n会增加,改变瓦片请求参数,以刷新浏览器缓存
@@ -25,7 +25,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
      * 重新载入动态图层，当改变了图层条件时调用
      * @expose
      */
-    reload: function() {
+    reload: function () {
         this.n = this.n + 1;
         this.load();
     },
@@ -33,34 +33,40 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
     /**
      * 载入前的准备, 由父类中的load方法调用
      */
-    _prepareLoad: function() {
+    _prepareLoad: function () {
         var map = this.getMap();
         if (!this.options['layers'] || !this.options['mapdb']) {
             return false;
         }
         var me = this;
-        var url = this.options.baseUrl;
-        var queryString = this._formQueryString();
-        var ajax = new maptalks.Util.Ajax(url, 0, queryString, function(responseText) {
-            var result = maptalks.Util.parseJSON(responseText);
-            if (result && result.hasOwnProperty('layergroupid')) {
-                me._token = result.layergroupid;
-                me._renderer.render(me.options.showOnTileLoadComplete);
-            }
-        });
         //保证在高频率load时，dynamicLayer总能在zoom结束时只调用一次
         if (this._loadDynamicTimeout) {
             clearTimeout(this._loadDynamicTimeout);
         }
 
-        this._loadDynamicTimeout = setTimeout(function() {
-            ajax.post('application/json');
-        }, map._getZoomMillisecs() + 80);
+        this._loadDynamicTimeout = setTimeout(function () {
+            Ajax.post(
+                {
+                    url : me.options.baseUrl,
+                    headers : {
+                        'Content-Type' : 'application/json'
+                    }
+                },
+                me._formQueryString(),
+                function (responseText) {
+                    var result = maptalks.Util.parseJSON(responseText);
+                    if (result && result.hasOwnProperty('layergroupid')) {
+                        me._token = result.layergroupid;
+                        me._renderer.render(me.options.showOnTileLoadComplete);
+                    }
+                }
+            );
+        }, map.options['zoomAnimationDuration'] + 80);
         //通知父类先不载入瓦片
         return false;
     },
 
-    _getTileUrl: function(x, y, z) {
+    _getTileUrl: function (x, y, z) {
         return this._getRequestUrl(y, x, z);
     },
 
@@ -71,7 +77,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
      * @param zoomLevel
      * @returns
      */
-    _getRequestUrl: function(topIndex, leftIndex, zoom) {
+    _getRequestUrl: function (topIndex, leftIndex, zoom) {
         var map = this.getMap();
         var res = map._getResolution(zoom);
         var tileConfig = this._getTileConfig();
@@ -88,12 +94,12 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
         return url;
     },
 
-    _formQueryString: function() {
+    _formQueryString: function () {
         var mapConfig = {};
         mapConfig.version = '1.0.0';
         // mapConfig.extent = [];
         mapConfig.layers = [];
-        for(var i = 0, len = this.options.layers.length; i < len; i++) {
+        for (var i = 0, len = this.options.layers.length; i < len; i++) {
             var l = this.options.layers[i];
             var q = {
                 // avoid pass string "undefined" to query service
@@ -113,6 +119,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
                     q.spatialFilter = l.spatialFilter;
                 }
             }
+
             var layer = {
                 type: 'maptalks',
                 options: {
@@ -120,7 +127,9 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
                     layer: l.name,
                     filter: JSON.stringify(q),
                     cartocss: l.cartocss,
+                    /*eslint-disable camelcase*/
                     cartocss_version: l.cartocss_version
+                    /*eslint-enable camelcase*/
                 }
             };
             mapConfig.layers.push(layer);
