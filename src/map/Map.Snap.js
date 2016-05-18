@@ -60,7 +60,7 @@ maptalks.Map.include({
                 snapConfig.push(this.genSnapConfig(options.snaps[i]));
             }
         } else {
-            snapConfig = this.genSnapConfig(options.snap);
+            snapConfig = this.genSnapConfig(options);
         }
         //optional host and port, if need another snap server to perform snapping.
         var host = options['host'];
