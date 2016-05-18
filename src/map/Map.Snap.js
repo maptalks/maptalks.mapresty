@@ -74,7 +74,7 @@ maptalks.Map.include({
             url = 'http://' + prefixHost + ':' + prefixPort + '/snap/';
         }
 
-        Ajax.post(
+        maptalks.Ajax.post(
             {
                 url : url,
                 headers : {

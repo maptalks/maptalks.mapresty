@@ -45,7 +45,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
         }
 
         this._loadDynamicTimeout = setTimeout(function () {
-            Ajax.post(
+            maptalks.Ajax.post(
                 {
                     url : me.options.baseUrl,
                     headers : {
