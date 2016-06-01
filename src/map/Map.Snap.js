@@ -13,6 +13,9 @@ maptalks.Map.include({
         var extent = options['extent'] || this.getExtent(),
             zoom = options['zoom']  || this.getZoom(),
             format = options['format'] || 'png';
+        if (extent instanceof maptalks.Geometry) {
+            extent = extent.getExtent();
+        }
         var serverDir = options['serverDir'],
             serverFileName = options['serverFileName'];
 
