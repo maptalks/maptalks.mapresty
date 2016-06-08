@@ -23,7 +23,6 @@ gulp.task('scripts', function() {
       .pipe(gulp.dest('./dist'));
 });
 
-
 gulp.task('build',['scripts'],function() {
 });
 

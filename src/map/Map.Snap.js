@@ -13,6 +13,9 @@ maptalks.Map.include({
         var extent = options['extent'] || this.getExtent(),
             zoom = options['zoom']  || this.getZoom(),
             format = options['format'] || 'png';
+        if (extent instanceof maptalks.Geometry) {
+            extent = extent.getExtent();
+        }
         var serverDir = options['serverDir'],
             serverFileName = options['serverFileName'];
 
@@ -30,12 +33,12 @@ maptalks.Map.include({
                 for (var i = 0, len = extraGeometries.length; i < len; i++) {
                     extraLayer.addGeometry(extraGeometries[i].copy());
                 }
-            } else {
+            } else if (extraGeometries instanceof maptalks.Geometry) {
                 extraLayer.addGeometry(extraGeometries.copy());
             }
-
-            var extraLayerJSON = extraLayer.toJSON();
-            profile['layers'].push(extraLayerJSON);
+            if (extraLayer.getCount() > 0) {
+                profile['layers'].push(extraLayer.toJSON());
+            }
         }
         var snapConfig = {
             'format' : format,
@@ -60,7 +63,7 @@ maptalks.Map.include({
                 snapConfig.push(this.genSnapConfig(options.snaps[i]));
             }
         } else {
-            snapConfig = this.genSnapConfig(options.snap);
+            snapConfig = this.genSnapConfig(options);
         }
         //optional host and port, if need another snap server to perform snapping.
         var host = options['host'];
@@ -74,7 +77,7 @@ maptalks.Map.include({
             url = 'http://' + prefixHost + ':' + prefixPort + '/snap/';
         }
 
-        Ajax.post(
+        maptalks.Ajax.post(
             {
                 url : url,
                 headers : {
@@ -82,7 +85,10 @@ maptalks.Map.include({
                 }
             },
             snapConfig,
-            function (responseText) {
+            function (err, responseText) {
+                if (err) {
+                    throw err;
+                }
                 var result = JSON.parse(responseText);
                 if (callback) {
                     if (result['success']) {
