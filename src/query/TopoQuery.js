@@ -108,7 +108,7 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
                         callback(result);
                         return;
                     }
-                    var svrBuffered = maptalks.GeoJSON.fromGeoJSON(result['data']);
+                    var svrBuffered = maptalks.GeoJSON.toGeometry(result['data']);
                     var tmpIndex = 0;
                     for (i = 0, len = geometries.length; i < len; i++) {
                         var g;

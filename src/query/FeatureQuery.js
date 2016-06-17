@@ -154,7 +154,7 @@ maptalks.Util.extend(maptalks.FeatureQuery.prototype, {
                             for (i = 0, len = datas.length; i < len; i++) {
                                 collections.push({
                                     'layer' : datas[i]['layer'],
-                                    'features' : maptalks.GeoJSON.fromGeoJSON(datas[i]['features'])
+                                    'features' : maptalks.GeoJSON.toGeometry(datas[i]['features'])
                                 });
                             }
                             callback(null, collections);
