@@ -37,6 +37,6 @@
     "sinon": "^1.14.1"
   },
   "dependencies": {
-    "maptalks": "^0.1.0"
+    "maptalks": "~0.x"
   }
 }
