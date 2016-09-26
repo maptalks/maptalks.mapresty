@@ -4,21 +4,25 @@ describe('DynamicLayer', function () {
 
     var container;
     var map;
-    var center = new maptalks.Coordinate(118.846825, 32.046534);
+    var p1 = [110.582514, 27.87486003];
+    var p2 = [110.6846798, 28.00622502];
+    var c = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
+    var center = new maptalks.Coordinate(c);
 
     beforeEach(function () {
         container = document.createElement('div');
-        container.style.width = '256px';
-        container.style.height = '256px';
+        container.style.width = '512px';
+        container.style.height = '512px';
         document.body.appendChild(container);
         var option = {
             center: center,
-            zoom: 14
+            zoom: 9
         };
         map = new maptalks.Map(container, option);
         var tile = new maptalks.TileLayer('tile', {
-            urlTemplate: '/resources/tile.png',
-            subdomains: [1, 2, 3]
+            renderer: 'dom',
+            urlTemplate: 'http://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png',
+            subdomains: ['a', 'b', 'c']
         });
         map.setBaseLayer(tile);
     });
@@ -29,11 +33,14 @@ describe('DynamicLayer', function () {
 
     it('test', function () {
         var dynamic = new maptalks.DynamicLayer('d', {
+            renderer: 'dom',
             baseUrl: 'http://localhost:11216/map',
-            mapdb: 'sdb',
+            mapdb: 'pg92_chinamap_maptalks',
+            // resultCRS: maptalks.CRS.createProj4('+proj=longlat +datum=GCJ02'),
+            resultCRS: 'GCJ02',
             layers: [{
                 name: 'country_point',
-                condition: '',
+                condition: 'name like \'%乡\'',
                 fields: ['name', 'kind'],
                 style: {
                     'filter': ['==', '$type', 'Point'],
