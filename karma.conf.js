@@ -7,8 +7,9 @@ module.exports = function(config) {
 
   var files = [
     './node_modules/maptalks/dist/maptalks.js',
-    'src/**/*.js',    
-    'test/*.js'
+    'src/**/*.js',
+    'test/DynamicLayerSpec.js',
+    {pattern: 'test/resources/*', watched: false, included: false, served: true}
   ];
 
   config.set({
@@ -19,6 +20,7 @@ module.exports = function(config) {
     basePath: '',
 
     proxies: {
+      '/resources/': '/base/test/resources/'
     },
 
     // testing framework to use (jasmine/mocha/qunit/...)

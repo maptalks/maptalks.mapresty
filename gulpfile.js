@@ -1,3 +1,4 @@
+/* eslint-env node */
 'use strict';
 
 var gulp   = require('gulp'),
@@ -39,6 +40,16 @@ gulp.task('test', ['build'], function(done) {
     singleRun: true
   };
   new Server(karmaConfig, done).start();
+});
+
+gulp.task('debug', function (done) {
+  var karmaConfig = {
+    configFile: __dirname + '/karma.conf.js',
+    browsers: ['Chrome'],
+    singleRun: false
+  };
+  var server = new Server(karmaConfig, done);
+  server.start();
 });
 
 gulp.task('default', ['watch']);

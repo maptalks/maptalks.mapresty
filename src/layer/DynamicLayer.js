@@ -7,11 +7,10 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
     options: {
         baseUrl: '',
         format: 'png',
-        // inputCRS: maptalks.CRS.createProj4('+proj=longlat +datum=GCJ02'),
-        resultCRS: maptalks.CRS.createProj4('+proj=merc +datum=GCJ02'),
+        // resultCRS: 'WGS84',
         showOnTileLoadComplete: false
         // mapdb: '',
-        // layers: [{name: 'name', condition: '', spatialFilter: {}, cartocss: '', cartocss_version: ''}]
+        // layers: [ { name: 'name', condition: '', spatialFilter: {}, fields: ['*'], style: { filter: {}, symbol: {} } } ]
     },
 
     initialize: function (id, opts) {
@@ -33,7 +32,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
     /**
      * 载入前的准备, 由父类中的load方法调用
      */
-    _prepareLoad: function () {
+    onAdd: function () {
         var map = this.getMap();
         if (!this.options['layers'] || !this.options['mapdb']) {
             return false;
@@ -53,10 +52,13 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
                     }
                 },
                 me._formQueryString(),
-                function (responseText) {
+                function (err, responseText) {
+                    if (err) {
+                        throw err;
+                    }
                     var result = maptalks.Util.parseJSON(responseText);
-                    if (result && result.hasOwnProperty('layergroupid')) {
-                        me._token = result.layergroupid;
+                    if (result && result.hasOwnProperty('token')) {
+                        me._token = result.token;
                         me._renderer.render(me.options.showOnTileLoadComplete);
                     }
                 }
@@ -67,7 +69,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
     },
 
     _getTileUrl: function (x, y, z) {
-        return this._getRequestUrl(y, x, z);
+        return this._getRequestUrl(x, y, z);
     },
 
     /**
@@ -77,38 +79,35 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
      * @param zoomLevel
      * @returns
      */
-    _getRequestUrl: function (topIndex, leftIndex, zoom) {
-        var map = this.getMap();
-        var res = map._getResolution(zoom);
-        var tileConfig = this._getTileConfig();
-        var sw = tileConfig.getTileProjectedSw(topIndex, leftIndex, res);
+    _getRequestUrl: function (x, y, z) {
         var parts = [];
         parts.push(this.options.baseUrl);
         parts.push(this._token);
-        parts.push(zoom);
-        parts.push(res);
-        parts.push(sw[0]); // xmin
-        parts.push(sw[1]); // ymin
+        parts.push(z);
+        parts.push(x);
+        parts.push(y);
         var url = parts.join('/');
         url += '.' + this.options.format;
         return url;
     },
 
     _formQueryString: function () {
+        var map = this.getMap();
         var mapConfig = {};
         mapConfig.version = '1.0.0';
-        // mapConfig.extent = [];
+        mapConfig.extent = map.getMaxExtent();
+        mapConfig.options = {
+            center: map.getCenter(),
+            zoom: map.getZoom()
+        };
         mapConfig.layers = [];
         for (var i = 0, len = this.options.layers.length; i < len; i++) {
             var l = this.options.layers[i];
             var q = {
                 // avoid pass string "undefined" to query service
                 condition: l.condition ? l.condition : '',
-                resultFields: ['*']
+                resultFields: l.fields ? l.fields : ['*']
             };
-            if (this.options.inputCRS) {
-                q.inputCRS = this.options.inputCRS;
-            } // else, spatialFilter will be treat as in layer's CRS
             if (this.options.resultCRS) {
                 q.resultCRS = this.options.resultCRS;
             } // else, result will be return in layer's CRS
@@ -121,15 +120,13 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
             }
 
             var layer = {
+                id: l.name,
                 type: 'maptalks',
                 options: {
-                    dbname: this.options.mapdb,
+                    database: this.options.mapdb,
                     layer: l.name,
-                    filter: JSON.stringify(q),
-                    cartocss: l.cartocss,
-                    /*eslint-disable camelcase*/
-                    cartocss_version: l.cartocss_version
-                    /*eslint-enable camelcase*/
+                    queryFilter: q,
+                    style: l.style ? l.style : {}
                 }
             };
             mapConfig.layers.push(layer);
