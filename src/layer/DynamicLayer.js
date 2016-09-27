@@ -96,9 +96,11 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
         var mapConfig = {};
         mapConfig.version = '1.0.0';
         mapConfig.extent = map.getMaxExtent();
+        var view = map.getView();
         mapConfig.options = {
             center: map.getCenter(),
-            zoom: map.getZoom()
+            zoom: map.getZoom(),
+            view: view.options
         };
         mapConfig.layers = [];
         for (var i = 0, len = this.options.layers.length; i < len; i++) {
