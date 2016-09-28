@@ -1,9 +1,4 @@
 maptalks.DynamicLayer = maptalks.TileLayer.extend({
-    type: 'dynamic',
-
-    //瓦片图层的基础ZIndex
-    baseZIndex: 50,
-
     options: {
         baseUrl: '',
         format: 'png',
@@ -51,12 +46,12 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
                         'Content-Type' : 'application/json'
                     }
                 },
-                me._formQueryString(),
-                function (err, responseText) {
+                me._buildMapConfig(),
+                function (err, response) {
                     if (err) {
                         throw err;
                     }
-                    var result = maptalks.Util.parseJSON(responseText);
+                    var result = maptalks.Util.parseJSON(response);
                     if (result && result.hasOwnProperty('token')) {
                         me._token = result.token;
                         me._renderer.render(me.options.showOnTileLoadComplete);
@@ -69,29 +64,17 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
     },
 
     _getTileUrl: function (x, y, z) {
-        return this._getRequestUrl(x, y, z);
-    },
-
-    /**
-     * 获得瓦片请求地址
-     * @param topIndex
-     * @param leftIndex
-     * @param zoomLevel
-     * @returns
-     */
-    _getRequestUrl: function (x, y, z) {
         var parts = [];
         parts.push(this.options.baseUrl);
         parts.push(this._token);
         parts.push(z);
         parts.push(x);
-        parts.push(y);
+        parts.push(y + '.' + this.options.format);
         var url = parts.join('/');
-        url += '.' + this.options.format;
         return url;
     },
 
-    _formQueryString: function () {
+    _buildMapConfig: function () {
         var map = this.getMap();
         var mapConfig = {};
         mapConfig.version = '1.0.0';
@@ -133,7 +116,7 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
             };
             mapConfig.layers.push(layer);
         }
-        return JSON.stringify(mapConfig);
+        return mapConfig;
     }
 
 });
