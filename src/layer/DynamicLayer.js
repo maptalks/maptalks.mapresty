@@ -104,15 +104,25 @@ maptalks.DynamicLayer = maptalks.TileLayer.extend({
                 }
             }
 
-            var layer = {
-                id: l.name,
-                type: 'maptalks',
-                options: {
-                    database: this.options.mapdb,
-                    layer: l.name,
-                    queryFilter: q,
+            var layerType = l.type || 'maptalks';
+            var layerOptions = {
+                database: this.options.mapdb,
+                layer: l.table || l.name,
+                queryFilter: q
+            };
+
+            if (layerType !== 'maptalks') {
+                maptalks.Util.extend(layerOptions, l.options || {});
+            } else {
+                maptalks.Util.extend(layerOptions, {
                     style: l.style ? l.style : {}
-                }
+                });
+            }
+
+            var layer = {
+                id: l.id || l.name,
+                type: layerType,
+                options: layerOptions
             };
             mapConfig.layers.push(layer);
         }
