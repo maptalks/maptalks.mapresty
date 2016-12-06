@@ -7,6 +7,7 @@ describe('DynamicLayer', function () {
     var p1 = [110.582514, 27.87486003];
     var p2 = [110.6846798, 28.00622502];
     var c = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
+    c = [120.273218, 31.540285];
     var center = new maptalks.Coordinate(c);
 
     beforeEach(function () {
@@ -32,6 +33,7 @@ describe('DynamicLayer', function () {
 
     it('layer-type-maptalks', function () {
         var file = 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgaGVpZ2h0PSI0NiIgd2lkdGg9IjMyIiB2aWV3Qm94PSIwIDAgMTYgMjMiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiID48ZGVmcz48L2RlZnM+IDxwYXRoICBmaWxsPSIjREUzMzMzIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZD0iTTggMjNsMCAwIDAgMCAwIDAgMCAwIDAgMGMtNCwtNSAtOCwtMTAgLTgsLTE0IDAsLTUgNCwtOSA4LC05bDAgMCAwIDBjNCwwIDgsNCA4LDkgMCw0IC00LDkgLTgsMTR6IE01LDkgYTMsMyAwLDEsMCwwLC0wLjlaIj48L3BhdGg+IDwvc3ZnPg==';
+        file = 'D:\\projects\\maptalks.js\\assets\\images\\control\\2.png';
         var style = [{
             markerWidth: {
                 stops: [
@@ -67,9 +69,10 @@ describe('DynamicLayer', function () {
             markerLineOpacity: 0.9,
             markerFillColor: '#4E98DD',
             markerFillOpacity: 0.9,
-            markerFile: file
+            // markerFile: file
+            markerType: 'x'
         }, {
-            textName: '{name}',
+            textName: '{F3}',
             textFaceName: '"microsoft yahei", arial, sans-serif',
             textSize: 12,
             textFill: '#FFFFFF',
@@ -99,28 +102,4 @@ describe('DynamicLayer', function () {
         });
         map.addLayer(dynamic);
     });
-
-    it('layer-type-cluster', function () {
-        var dynamic = new maptalks.DynamicLayer('d', {
-            baseUrl: 'http://localhost:11216/maps',
-            mapdb: 'mysql_chinamap_maptalks',
-            // resultCRS: maptalks.CRS.createProj4('+proj=longlat +datum=GCJ02'),
-            resultCRS: 'GCJ02',
-            layers: [{
-                id: 'country-point-cluster',
-                type: 'cluster',
-                table: 'country_point',
-                condition: 'name like \'%乡\'',
-                fields: ['name', 'kind'],
-                options: {
-                    animation: false,
-                    symbol: {
-                        markerLineColor: 'orange'
-                    }
-                }
-            }]
-        });
-        map.addLayer(dynamic);
-    });
-
 });

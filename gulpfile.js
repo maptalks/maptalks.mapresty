@@ -32,7 +32,7 @@ gulp.task('watch', ['test'], function () {
 });
 
 gulp.task('test', ['build'], function(done) {
-  gulp.src(['dist/maptalks.mapresty.js','test/*.js'], {read: false})
+  gulp.src(['dist/maptalks.mapresty.js','test/DynamicLayerSpec.js'], {read: false})
         .pipe(mocha());
   var karmaConfig = {
     configFile: __dirname + '/karma.conf.js',
