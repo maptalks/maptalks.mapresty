@@ -1,45 +1,33 @@
-/* eslint-env node */
-'use strict';
+const gulp = require('gulp'),
+    pkg = require('./package.json'),
+    BundleHelper = require('maptalks-build-helpers').BundleHelper,
+    TestHelper = require('maptalks-build-helpers').TestHelper;
+const bundleHelper = new BundleHelper(pkg);
+const testHelper = new TestHelper();
+const karmaConfig = require('./karma.config');
 
-var gulp   = require('gulp'),
-  header = require('gulp-header'),
-  footer = require('gulp-footer'),
-  concat = require('gulp-concat'),
-  gzip   = require('gulp-gzip'),
-  rename = require('gulp-rename'),
-  uglify = require('gulp-uglify'),
-  mocha  = require('gulp-mocha'),
-  Server = require('karma').Server;
-
-gulp.task('scripts', function() {
-  return gulp.src('src/**/*.js')
-      .pipe(concat('maptalks.mapresty.js'))
-      .pipe(header('(function () {\n\'use strict\';\n'))
-      .pipe(footer('\n})();'))
-      .pipe(gulp.dest('./dist'))
-      .pipe(rename({suffix: '.min'}))
-      .pipe(uglify())
-      .pipe(gulp.dest('./dist'))
-      .pipe(gzip())
-      .pipe(gulp.dest('./dist'));
+gulp.task('build', () => {
+    const rollupConfig = bundleHelper.getDefaultRollupConfig();
+    rollupConfig['sourceMap'] = false;
+    return bundleHelper.bundle('index.js', rollupConfig);
 });
 
-gulp.task('build',['scripts'],function() {
+gulp.task('minify', ['build'], () => {
+    bundleHelper.minify();
 });
 
-gulp.task('watch', ['test'], function () {
-  var scriptWatcher = gulp.watch(['src/**/*.js', 'test/**/*.js','./gulpfile.js'], ['test']); // watch the same files in our scripts task
+gulp.task('watch', ['build'], () => {
+    gulp.watch(['index.js', 'src/**/*', './gulpfile.js'], ['build']);
 });
 
-gulp.task('test', ['build'], function(done) {
-  gulp.src(['dist/maptalks.mapresty.js','test/DynamicLayerSpec.js'], {read: false})
-        .pipe(mocha());
-  var karmaConfig = {
-    configFile: __dirname + '/karma.conf.js',
-    browsers: ['PhantomJS'],
-    singleRun: true
-  };
-  new Server(karmaConfig, done).start();
+gulp.task('test', ['build'], () => {
+    testHelper.test(karmaConfig);
+});
+
+gulp.task('tdd', ['build'], () => {
+    karmaConfig.singleRun = false;
+    gulp.watch(['index.js', 'src/**/*'], ['test']);
+    testHelper.test(karmaConfig);
 });
 
 gulp.task('debug', function (done) {
@@ -53,3 +41,4 @@ gulp.task('debug', function (done) {
 });
 
 gulp.task('default', ['watch']);
+

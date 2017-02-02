@@ -1,3 +1,5 @@
+import * as maptalks from 'maptalks';
+
 /**
  * 空间过滤类
  * @class maptalks.SpatialFilter
@@ -6,43 +8,42 @@
  * @param {Number} relation
  * @author Maptalks Team
  */
-maptalks.SpatialFilter = function (geometry, relation, crs) {
-    this.geometry = geometry;
-    this.relation = relation;
-    this.crs = crs;
-};
+export default class SpatialFilter {
+    constructor(geometry, relation, crs) {
+        this.geometry = geometry;
+        this.relation = relation;
+        this.crs = crs;
+    }
 
-maptalks.Util.extend(maptalks.SpatialFilter.prototype, {
     /**
      * 获取SpatialFilter中的geometry
      * @return {maptalks.Geometry} SpatialFilter的Geometry
      * @expose
      */
-    getGeometry: function () {
+    getGeometry() {
         return this.geometry;
-    },
+    }
 
     /**
      * 获取SpatialFilter的json
      * @return {String} spatialfilter
      * @expose
      */
-    toJSON: function () {
+    toJSON() {
         var geojson = this.geometry;
         if (this.geometry instanceof maptalks.Geometry) {
             geojson = this.geometry.toGeoJSONGeometry();
         }
-        var jsonObj = {
+        return {
             'geometry': geojson,
             'relation': this.relation,
             'crs':this.crs
         };
-        return jsonObj;
     }
 
-});
+}
 
-maptalks.Util.extend(maptalks.SpatialFilter, {
+maptalks.Util.extend(SpatialFilter, {
     /**
      * @static
      * @property {Number} RELATION_INTERSECT 相交

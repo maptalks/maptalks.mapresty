@@ -7,7 +7,7 @@ describe('DynamicLayer', function () {
     var p1 = [110.582514, 27.87486003];
     var p2 = [110.6846798, 28.00622502];
     var c = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
-    c = [120.273218, 31.540285];
+    c = [121.359403, 31.232223];
     var center = new maptalks.Coordinate(c);
 
     beforeEach(function () {
@@ -21,8 +21,10 @@ describe('DynamicLayer', function () {
         };
         map = new maptalks.Map(container, option);
         var tile = new maptalks.TileLayer('tile', {
-            urlTemplate: 'http://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png',
-            subdomains: ['a', 'b', 'c']
+            // urlTemplate: 'http://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png',
+            // subdomains: ['a', 'b', 'c']
+            'urlTemplate' : 'http://webrd{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+            'subdomains'  : ['01','02','03','04'],
         });
         map.setBaseLayer(tile);
     });
@@ -71,7 +73,7 @@ describe('DynamicLayer', function () {
             markerFillOpacity: 0.9,
             // markerFile: file
             markerType: 'x'
-        }, {
+        }/*, {
             textName: '{F3}',
             textFaceName: '"microsoft yahei", arial, sans-serif',
             textSize: 12,
@@ -85,7 +87,7 @@ describe('DynamicLayer', function () {
             textHaloFill: '#4E98DD',
             textHaloRadius: 4,
             textDy: 5
-        }];
+        }*/];
         var dynamic = new maptalks.DynamicLayer('d', {
             baseUrl: 'http://localhost:11216/maps',
             mapdb: 'mysql_chinamap_maptalks',
@@ -96,7 +98,11 @@ describe('DynamicLayer', function () {
                 condition: 'name like \'%乡\'',
                 fields: ['name', 'kind'],
                 style: {
-                    symbol: style
+                    symbol: {
+                        'markerType'   : 'ellipse',
+                        'markerWidth'  : 4,
+                        'markerHeight' : 4
+                    }
                 }
             }]
         });

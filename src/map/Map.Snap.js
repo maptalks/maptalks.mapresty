@@ -1,5 +1,7 @@
+import * as maptalks from 'maptalks';
+
 maptalks.Map.include({
-    genSnapConfig: function (options) {
+    genSnapConfig(options) {
         if (!options) {
             options = {
                 'extent'    : this.getExtent(),
@@ -10,27 +12,27 @@ maptalks.Map.include({
         if (options.profile && options.profile.version) {
             return options;
         }
-        var extent = options['extent'] || this.getExtent(),
-            zoom = options['zoom']  || this.getZoom(),
+        var extent = options['extent'] || this.getExtent();
+        const zoom = options['zoom']  || this.getZoom(),
             format = options['format'] || 'png';
         if (extent instanceof maptalks.Geometry) {
             extent = extent.getExtent();
         }
-        var serverDir = options['serverDir'],
+        const serverDir = options['serverDir'],
             serverFileName = options['serverFileName'];
 
-        var profile = this.toJSON(maptalks.Util.extend({}, options['profile'], {'clipExtent':extent}));
+        const profile = this.toJSON(maptalks.Util.extend({}, options['profile'], { 'clipExtent' : extent }));
         profile['extent'] = extent;
         profile.options['zoom'] = zoom;
-        var center = extent.getCenter();
-        profile.options['center'] = center;
+
+        profile.options['center'] = extent.getCenter();
 
         //extra geometries to add to the snapping.
-        var extraGeometries = options['extraGeometries'];
+        const extraGeometries = options['extraGeometries'];
         if (extraGeometries) {
-            var extraLayer = new maptalks.VectorLayer(maptalks.Util.GUID());
-            if (maptalks.Util.isArrayHasData(extraGeometries)) {
-                for (var i = 0, len = extraGeometries.length; i < len; i++) {
+            let extraLayer = new maptalks.VectorLayer(maptalks.Util.GUID());
+            if (Array.isArray(extraGeometries)) {
+                for (let i = 0, len = extraGeometries.length; i < len; i++) {
                     extraLayer.addGeometry(extraGeometries[i].copy());
                 }
             } else if (extraGeometries instanceof maptalks.Geometry) {
@@ -55,32 +57,22 @@ maptalks.Map.include({
      * @member maptalks.Map
      * @expose
      */
-    snap:function (options, callback) {
+    snap(options, callback) {
         var snapConfig;
-        if (options.snaps && maptalks.Util.isArray(options.snaps)) {
+        if (options.snaps && Array.isArray(options.snaps)) {
             snapConfig = [];
-            for (var i = 0, len = options.snaps.length; i < len; i++) {
+            for (let i = 0, l = options.snaps.length; i < l; i++) {
                 snapConfig.push(this.genSnapConfig(options.snaps[i]));
             }
         } else {
             snapConfig = this.genSnapConfig(options);
         }
         //optional host and port, if need another snap server to perform snapping.
-        var host = options['host'];
-        var url;
-        if (host) {
-            url = host + '/snap/';
-        } else {
-            var prefixUrl = new maptalks.Url(maptalks.prefix);
-            var prefixHost = prefixUrl.getHost();
-            var prefixPort = prefixUrl.getPort();
-            url = 'http://' + prefixHost + ':' + prefixPort + '/snap/';
-        }
-
+        const host = options['host'];
         maptalks.Ajax.post(
             {
-                url : url,
-                headers : {
+                'url' : host + '/snap/',
+                'headers' : {
                     'Content-Type' : 'text/plain'
                 }
             },
@@ -89,7 +81,7 @@ maptalks.Map.include({
                 if (err) {
                     throw err;
                 }
-                var result = JSON.parse(responseText);
+                const result = JSON.parse(responseText);
                 if (callback) {
                     if (result['success']) {
                         callback(null, result);
