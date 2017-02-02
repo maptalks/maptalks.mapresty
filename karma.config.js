@@ -6,8 +6,13 @@ module.exports = {
     files: [
         'node_modules/maptalks/dist/maptalks.js',
         'dist/' + pkg.name + '.js',
-        'test/**/*.js'
+        //'test/**/*.js'
+        'test/DynamicLayerSpec.js',
+        { pattern: 'test/resources/*', watched: false, included: false, served: true }
     ],
+    proxies: {
+        '/resources/': '/base/test/resources/'
+    },
     preprocessors: {
     },
     browsers: ['Chrome'],
