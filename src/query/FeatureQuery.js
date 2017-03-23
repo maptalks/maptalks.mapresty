@@ -204,7 +204,7 @@ export default class FeatureQuery {
         }
         if (queryFilter['resultFields']) {
             var fields = queryFilter['resultFields'];
-            if (maptalks.Util.isArray(fields)) {
+            if (Array.isArray(fields)) {
                 fields = fields.join(',');
             }
             ret.push('fields=' + fields);

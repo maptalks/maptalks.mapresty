@@ -30,7 +30,7 @@ maptalks.Map.include({
         //extra geometries to add to the snapping.
         const extraGeometries = options['extraGeometries'];
         if (extraGeometries) {
-            let extraLayer = new maptalks.VectorLayer(maptalks.Util.GUID());
+            let extraLayer = new maptalks.VectorLayer('__SNAP_extraGeometries_' + maptalks.Util.GUID());
             if (Array.isArray(extraGeometries)) {
                 for (let i = 0, len = extraGeometries.length; i < len; i++) {
                     extraLayer.addGeometry(extraGeometries[i].copy());
