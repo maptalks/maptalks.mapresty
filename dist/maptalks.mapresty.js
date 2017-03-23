@@ -534,7 +534,7 @@ var FeatureQuery = function () {
         }
         if (queryFilter['resultFields']) {
             var fields = queryFilter['resultFields'];
-            if (maptalks.Util.isArray(fields)) {
+            if (Array.isArray(fields)) {
                 fields = fields.join(',');
             }
             ret.push('fields=' + fields);
@@ -760,7 +760,7 @@ maptalks.Map.include({
         //extra geometries to add to the snapping.
         var extraGeometries = options['extraGeometries'];
         if (extraGeometries) {
-            var extraLayer = new maptalks.VectorLayer(maptalks.Util.GUID());
+            var extraLayer = new maptalks.VectorLayer('__SNAP_extraGeometries_' + maptalks.Util.GUID());
             if (Array.isArray(extraGeometries)) {
                 for (var i = 0, len = extraGeometries.length; i < len; i++) {
                     extraLayer.addGeometry(extraGeometries[i].copy());
