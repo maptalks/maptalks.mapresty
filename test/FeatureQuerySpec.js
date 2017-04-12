@@ -91,7 +91,7 @@ describe('FeatureQuery', function () {
                     expect(features.length === 10);
                     for (var i = features.length - 1; i >= 0; i--) {
                         // console.log(expect(features[i].getProperties()));
-                        expect(features[i].getProperties()).to.be.eql({'name':features[i].getProperties().name});
+                        expect(features[i].getProperties()).to.be.eql({ 'name':features[i].getProperties().name });
                     }
                     done();
                 }

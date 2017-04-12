@@ -9,9 +9,9 @@
   },
   "main": "dist/maptalks.mapresty.js",
   "scripts": {
-    "lint": "eslint index.js test/**/*.js",
+    "lint": "eslint .",
     "test": "gulp test",
-    "pretest": "npm run lint",
+    "pretest": "npm run lint -- --fix",
     "prepublish": "npm run lint && gulp minify"
   },
   "devDependencies": {
