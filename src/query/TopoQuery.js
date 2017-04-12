@@ -45,7 +45,7 @@ export default class TopoQuery {
      * @expose
      */
     buffer(opts, callback) {
-        var geometries = opts['geometries'], distance = opts['distance'];
+        let geometries = opts['geometries'], distance = opts['distance'];
         if (maptalks.Util.isString(distance)) {
             distance = +distance;
         }
@@ -59,14 +59,14 @@ export default class TopoQuery {
          //准备参数
         const targets = [];
         for (let i = 0, l = geometries.length; i < l; i++) {
-            let geometry = geometries[i];
+            const geometry = geometries[i];
             if (!(geometry instanceof maptalks.Marker) && !(geometry instanceof maptalks.Circle)) {
-                let geoJSON = geometry.toGeoJSONGeometry();
+                const geoJSON = geometry.toGeoJSONGeometry();
                 targets.push(geoJSON);
             }
         }
         function formQueryString() {
-            var ret = 'distance=' + distance;
+            let ret = 'distance=' + distance;
             ret += '&targets=' + encodeURIComponent(JSON.stringify(targets));
             return ret;
         }
@@ -83,7 +83,7 @@ export default class TopoQuery {
         if (targets.length === 0) {
             //全都是点或者圆形
             for (let i = 0, l = geometries.length; i < l; i++) {
-                let r = bufferPointOrCircle(geometries[i]);
+                const r = bufferPointOrCircle(geometries[i]);
                 if (r) {
                     r.setSymbol(symbol);
                 }
@@ -108,7 +108,7 @@ export default class TopoQuery {
                         return;
                     }
                     const svrBuffered = maptalks.GeoJSON.toGeometry(result['data']);
-                    var tmpIndex = 0;
+                    let tmpIndex = 0;
                     for (let i = 0, l = geometries.length; i < l; i++) {
                         let g;
                         if ((geometries[i] instanceof maptalks.Marker) || (geometries[i] instanceof maptalks.Circle)) {
@@ -138,8 +138,8 @@ export default class TopoQuery {
      */
     relate(opts, callback) {
         const source = opts['source'];
-        var targets = opts['targets'],
-            relation = opts['relation'];
+        const relation = opts['relation'];
+        let targets = opts['targets'];
         if (targets && !Array.isArray(targets)) {
             targets = [targets];
         }
@@ -151,10 +151,10 @@ export default class TopoQuery {
             const srcGeoJSON = source.toGeoJSONGeometry();
             const targetGeoJSONs = [];
             for (let i = 0, len = targets.length; i < len; i++) {
-                let t = targets[i].toGeoJSONGeometry();
+                const t = targets[i].toGeoJSONGeometry();
                 targetGeoJSONs.push(t);
             }
-            var ret = 'source=' + JSON.stringify(srcGeoJSON);
+            let ret = 'source=' + JSON.stringify(srcGeoJSON);
             ret += '&targets=' + JSON.stringify(targetGeoJSONs);
             ret += '&relation=' + relation;
             return ret;

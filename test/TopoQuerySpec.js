@@ -1,15 +1,15 @@
 'use strict';
 
-var maptalks = (typeof (window) !== 'undefined') ? window.maptalks : require('maptalks'),
-    expect = (typeof (window) !== 'undefined') ? window.expect : require('expect.js');
+const maptalks = (typeof (window) !== 'undefined') ? window.maptalks : require('maptalks');
+const expect = (typeof (window) !== 'undefined') ? window.expect : require('expect.js');
 
 describe('TopoQuery', function () {
-    var host = 'localhost',
-        port = 11215;
+    const host = 'localhost';
+    const port = 11215;
     describe('query', function () {
         it('buffer', function (done) {
-            var distance = 100;
-            var topoQuery = new maptalks.TopoQuery({
+            const distance = 100;
+            const topoQuery = new maptalks.TopoQuery({
                 'host' : host,
                 'port' : port
             });
@@ -38,7 +38,7 @@ describe('TopoQuery', function () {
 
         it('relate', function (done) {
 
-            var topoQuery = new maptalks.TopoQuery({
+            const topoQuery = new maptalks.TopoQuery({
                 'host' : host,
                 'port' : port
             });
@@ -56,7 +56,7 @@ describe('TopoQuery', function () {
             function (err, data) {
                 expect(err === null);
                 expect(data.length === 4);
-                for (var i = 0; i < 3; i++) {
+                for (let i = 0; i < 3; i++) {
                     expect(data[i]);
                 }
                 expect(!data[3]);

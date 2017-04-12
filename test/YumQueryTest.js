@@ -1,16 +1,16 @@
 'use strict';
 
 describe.skip('YUMQuery', function () {
-    var host = 'localhost',
-        port = 8090,
-        mapdb = 'file';
+    const host = 'localhost';
+    const port = 8090;
+    const mapdb = 'file';
     //yum 的验证测试
     it('无锡PH街道测试', function () {
-        var spatialFilter = new maptalks.SpatialFilter(
+        const spatialFilter = new maptalks.SpatialFilter(
             new maptalks.Rectangle([116.32026326838199, 39.865799426134345], 10, 10),
             maptalks.SpatialFilter.RELATION_WITHIN
             );
-        var featureQuery = new maptalks.FeatureQuery({
+        const featureQuery = new maptalks.FeatureQuery({
             'host' : host,
             'port' : port,
             'mapdb': mapdb

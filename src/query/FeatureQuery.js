@@ -79,7 +79,7 @@ export default class FeatureQuery {
         if (!opts['layer']) {
             throw new Error('layer is not specified in query options.');
         }
-        var layer = opts['layer'];
+        let layer = opts['layer'];
 
         if (!layer) {
             throw new Error('layer is not specified in query options.');
@@ -87,7 +87,7 @@ export default class FeatureQuery {
         if (maptalks.Util.isArrayHasData(layer)) {
             layer = layer.join(',');
         } else if (maptalks.Util.isString(layer)) {
-            let segs = layer.split(',');
+            const segs = layer.split(',');
             //去掉图层名前后两端的空格, 如 foo1, foo2 , foo3 ----> foo1,foo2,foo3
             for (let i = segs.length - 1; i >= 0; i--) {
                 segs[i] = segs[i].replace(/(^\s*)|(\s*$)/g, '');
@@ -96,14 +96,14 @@ export default class FeatureQuery {
         }
         //•/databases/{db}/layers/{id}/data?op=query
         const url = this.getHost() + '/rest/sdb/databases/' + this.mapdb + '/layers/' + layer + '/data?op=query';
-        var queryFilter = opts['queryFilter'];
+        let queryFilter = opts['queryFilter'];
         if (!queryFilter) {
             //默认的queryFilter
             queryFilter = {
                 'fields':'*'
             };
         }
-        var postData = this.formQueryString(queryFilter);
+        let postData = this.formQueryString(queryFilter);
         if (maptalks.Util.isNumber(opts['page'])) {
             postData += '&page=' + opts['page'];
         }
@@ -172,7 +172,7 @@ export default class FeatureQuery {
      * @expose
      */
     formQueryString(queryFilter) {
-        var ret = [
+        const ret = [
             'encoding=utf-8',
             'mapdb=' + this.mapdb
         ];
@@ -186,7 +186,7 @@ export default class FeatureQuery {
             const spatialFilter = queryFilter['spatialFilter'];
             const filterGeo = spatialFilter['geometry'];
             if (filterGeo) {
-                var paramFilter;
+                let paramFilter;
                 if (spatialFilter instanceof SpatialFilter) {
                     paramFilter = spatialFilter.toJSON();
                 } else {
@@ -203,7 +203,7 @@ export default class FeatureQuery {
             ret.push('condition=' + encodeURIComponent(queryFilter['condition']));
         }
         if (queryFilter['resultFields']) {
-            var fields = queryFilter['resultFields'];
+            let fields = queryFilter['resultFields'];
             if (Array.isArray(fields)) {
                 fields = fields.join(',');
             }

@@ -30,7 +30,7 @@ export default class SpatialFilter {
      * @expose
      */
     toJSON() {
-        var geojson = this.geometry;
+        let geojson = this.geometry;
         if (this.geometry instanceof maptalks.Geometry) {
             geojson = this.geometry.toGeoJSONGeometry();
         }

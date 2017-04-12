@@ -3,14 +3,19 @@
 /**
  * Module dependencies.
  */
-var app = require('./mock'),
+const app = require('./mock'),
     http = require('http'),
     port = require('./config').port;
 
 /**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+/**
  * Get port from environment and store in Express.
  */
-var server;
 app.set('port', port);
 
 app.get('/stop', function () {
@@ -18,15 +23,9 @@ app.get('/stop', function () {
 });
 
 /**
- * Create HTTP server.
- */
-
-server = http.createServer(app);
-
-/**
  * Listen on provided port, on specified network interfaces.
  */
 
-var addr = 'localhost';
+const addr = 'localhost';
 
 server.listen(port, addr);

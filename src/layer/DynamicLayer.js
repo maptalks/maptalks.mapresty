@@ -100,8 +100,8 @@ export default class DynamicLayer extends maptalks.TileLayer {
         };
         mapConfig.layers = [];
         for (let i = 0, len = this.options.layers.length; i < len; i++) {
-            let l = this.options.layers[i];
-            let q = {
+            const l = this.options.layers[i];
+            const q = {
                 // avoid pass string "undefined" to query service
                 condition: l.condition ? l.condition : '',
                 resultFields: l.fields ? l.fields : ['*']

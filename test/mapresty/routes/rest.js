@@ -1,11 +1,11 @@
 'use strict';
 
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 router.post('/sdb/databases/:db/layers/:layer/data', function (req, res) {
-    var features = [];
-    for (var i = 0; i < 10; i++) {
+    const features = [];
+    for (let i = 0; i < 10; i++) {
         features.push({
             'type' : 'Feature',
             'geometry' : {
@@ -17,7 +17,7 @@ router.post('/sdb/databases/:db/layers/:layer/data', function (req, res) {
             }
         });
     }
-    var response = {
+    const response = {
         'success'   : true,
         'count'     : 100,
         'data'      : [

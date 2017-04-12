@@ -33,12 +33,12 @@ gulp.task('tdd', ['build'], () => {
 });
 
 gulp.task('debug', function (done) {
-    var karmaConfig = {
+    const karmaConfig = {
         configFile: path.join(__dirname, 'karma.config.js'),
         browsers: ['Chrome'],
         singleRun: false
     };
-    var server = new Server(karmaConfig, done);
+    const server = new Server(karmaConfig, done);
     server.start();
 });
 

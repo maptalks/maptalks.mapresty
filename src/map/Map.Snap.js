@@ -12,7 +12,7 @@ maptalks.Map.include({
         if (options.profile && options.profile.version) {
             return options;
         }
-        var extent = options['extent'] || this.getExtent();
+        let extent = options['extent'] || this.getExtent();
         const zoom = options['zoom']  || this.getZoom(),
             format = options['format'] || 'png';
         if (extent instanceof maptalks.Geometry) {
@@ -30,7 +30,7 @@ maptalks.Map.include({
         //extra geometries to add to the snapping.
         const extraGeometries = options['extraGeometries'];
         if (extraGeometries) {
-            let extraLayer = new maptalks.VectorLayer('__SNAP_extraGeometries_' + maptalks.Util.GUID());
+            const extraLayer = new maptalks.VectorLayer('__SNAP_extraGeometries_' + maptalks.Util.GUID());
             if (Array.isArray(extraGeometries)) {
                 for (let i = 0, len = extraGeometries.length; i < len; i++) {
                     extraLayer.addGeometry(extraGeometries[i].copy());
@@ -42,7 +42,7 @@ maptalks.Map.include({
                 profile['layers'].push(extraLayer.toJSON());
             }
         }
-        var snapConfig = {
+        const snapConfig = {
             'format' : format,
             'profile' : profile
         };
@@ -58,7 +58,7 @@ maptalks.Map.include({
      * @expose
      */
     snap(options, callback) {
-        var snapConfig;
+        let snapConfig;
         if (options.snaps && Array.isArray(options.snaps)) {
             snapConfig = [];
             for (let i = 0, l = options.snaps.length; i < l; i++) {

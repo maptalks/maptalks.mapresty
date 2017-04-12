@@ -1,7 +1,7 @@
 'use strict';
 
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -9,7 +9,7 @@ router.get('/', function (req, res) {
 }).post('/', function (req, res) {
     console.log('[server] snap request received');
     parsePostData(req, function (data) {
-        var response;
+        let response;
         if (Array.isArray(data)) {
             response = {
                 'success'   : true,
@@ -33,12 +33,12 @@ function parsePostData(req, callback) {
     if (req.body && (req.body.profile || Array.isArray(req.body))) {
         callback(req.body);
     } else {
-        var body = '';
+        let body = '';
         req.on('data', function (chunk) {
             body += chunk;
         });
         req.on('end', function () {
-            var data = JSON.parse(body);
+            const data = JSON.parse(body);
             callback(data);
         });
     }
