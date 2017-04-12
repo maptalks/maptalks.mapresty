@@ -1,2 +1,5 @@
-# maptalks.js
-the open-source javascript client for maptalks GIS engine.
+# maptalks.mapresty
+
+[![CircleCI](https://circleci.com/gh/maptalks/maptalks.mapresty.svg?style=svg)](https://circleci.com/gh/maptalks/maptalks.mapresty)
+
+A MapResty's client for maptalks.js.

@@ -1,39 +1,42 @@
+import * as maptalks from 'maptalks';
+
+//默认结果的symbol
+const defaultSymbol = {
+    'lineColor' : '#800040',
+    'lineWidth' : 2,
+    'lineOpacity' : 1,
+    'lineDasharray' :[20, 10, 5, 5, 5, 10],
+    'polygonOpacity': 0
+};
+
 /**
  * 拓扑查询类
  * @class maptalks.TopoQuery
  * @extends maptalks.Class
  * @author Maptalks Team
  */
-maptalks.TopoQuery = function (opts) {
-    if (!opts) {
-        return;
-    }
-    this.host = opts['host'];
-    this.port = opts['port'];
-    if (!this.host || !this.port) {
-        //默认采用js的服务地址作为查询地址
-        var url = new maptalks.Url(maptalks.prefix);
-        this.host = url.getHost();
-        this.port = url.getPort();
-    }
-};
+export default class TopoQuery {
 
-maptalks.Util.extend(maptalks.TopoQuery.prototype, {
-    //默认结果的symbol
-    defaultSymbol : {
-        'lineColor' : '#800040',
-        'lineWidth' : 2,
-        'lineOpacity' : 1,
-        'lineDasharray' :[20, 10, 5, 5, 5, 10],
-        'polygonOpacity': 0
-    },
+    constructor(opts) {
+        if (!opts) {
+            return;
+        }
+        this.host = opts['host'];
+        this.port = opts['port'];
+        this.protocol = opts['protocol'];
+    }
+
     /**
      * 获取空间库主机地址
      * @return {String} 空间库主机地址
      */
-    getHost:function () {
-        return this.host + ':' + this.port;
-    },
+    getHost() {
+        if (!this.port && !this.protocol) {
+            return this.host;
+        }
+        return (this.protocol  || 'http:') + '//' + this.host + ':' + this.port;
+    }
+
     /**
      * 计算Geometry的外缓冲，该功能需要引擎服务器版的支持
      * @member maptalks.Map
@@ -41,7 +44,7 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
      * @param {Number} distance 缓冲距离，单位为米
      * @expose
      */
-    buffer:function (opts, callback) {
+    buffer(opts, callback) {
         var geometries = opts['geometries'], distance = opts['distance'];
         if (maptalks.Util.isString(distance)) {
             distance = +distance;
@@ -49,20 +52,16 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
         if (!maptalks.Util.isArrayHasData(geometries) || !maptalks.Util.isNumber(distance)) {
             throw new Error('invalid parameters');
         }
-        var symbol = this.defaultSymbol;
-        if (opts['symbol']) {
-            symbol = opts['symbol'];
-        }
-        if (!maptalks.Util.isArray(geometries)) {
+        const symbol = opts['symbol'] || defaultSymbol;
+        if (!Array.isArray(geometries)) {
             geometries = [geometries];
         }
-        var i, len;
          //准备参数
-        var targets = [];
-        for (i = 0, len = geometries.length; i < len; i++) {
-            var geometry = geometries[i];
+        const targets = [];
+        for (let i = 0, l = geometries.length; i < l; i++) {
+            let geometry = geometries[i];
             if (!(geometry instanceof maptalks.Marker) && !(geometry instanceof maptalks.Circle)) {
-                var geoJSON = geometry.toGeoJSONGeometry();
+                let geoJSON = geometry.toGeoJSONGeometry();
                 targets.push(geoJSON);
             }
         }
@@ -80,11 +79,11 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
             }
             return null;
         }
-        var buffered = [];
+        const buffered = [];
         if (targets.length === 0) {
             //全都是点或者圆形
-            for (i = 0, len = geometries.length; i < len; i++) {
-                var r = bufferPointOrCircle(geometries[i]);
+            for (let i = 0, l = geometries.length; i < l; i++) {
+                let r = bufferPointOrCircle(geometries[i]);
                 if (r) {
                     r.setSymbol(symbol);
                 }
@@ -92,26 +91,26 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
             }
             callback(null, buffered);
         } else {
-            var url = 'http://' + this.getHost() + '/rest/geometry/analysis/buffer';
-            var queryString = formQueryString();
+            const url = this.getHost() + '/rest/geometry/analysis/buffer';
+            const queryString = formQueryString();
             maptalks.Ajax.post(
                 {
-                    url : url
+                    'url' : url
                 },
                 queryString,
                 function (err, resultText) {
                     if (err) {
                         throw err;
                     }
-                    var result = maptalks.Util.parseJSON(resultText);
+                    const result = maptalks.Util.parseJSON(resultText);
                     if (!result['success']) {
                         callback(result);
                         return;
                     }
-                    var svrBuffered = maptalks.GeoJSON.toGeometry(result['data']);
+                    const svrBuffered = maptalks.GeoJSON.toGeometry(result['data']);
                     var tmpIndex = 0;
-                    for (i = 0, len = geometries.length; i < len; i++) {
-                        var g;
+                    for (let i = 0, l = geometries.length; i < l; i++) {
+                        let g;
                         if ((geometries[i] instanceof maptalks.Marker) || (geometries[i] instanceof maptalks.Circle)) {
                             g = bufferPointOrCircle(geometries[i]);
                         } else {
@@ -126,7 +125,7 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
                 }
             );
         }
-    },
+    }
 
     /**
      * 判断Geometry和参数中的Geometry数组的空间关系，该功能需要引擎服务器版的支持
@@ -137,11 +136,11 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
      * @param {Function} success 回调函数，参数为布尔类型数组，数组长度与geometries参数数组相同，每一位代表相应的判断结果
      * @expose
      */
-    relate:function (opts, callback) {
-        var source = opts['source'],
-            targets = opts['targets'],
+    relate(opts, callback) {
+        const source = opts['source'];
+        var targets = opts['targets'],
             relation = opts['relation'];
-        if (targets && !maptalks.Util.isArray(targets)) {
+        if (targets && !Array.isArray(targets)) {
             targets = [targets];
         }
         if (!source || !maptalks.Util.isArrayHasData(targets) || !maptalks.Util.isNumber(opts['relation'])) {
@@ -149,10 +148,10 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
         }
 
         function formQueryString() {
-            var srcGeoJSON = source.toGeoJSONGeometry();
-            var targetGeoJSONs = [];
-            for (var i = 0, len = targets.length; i < len; i++) {
-                var t = targets[i].toGeoJSONGeometry();
+            const srcGeoJSON = source.toGeoJSONGeometry();
+            const targetGeoJSONs = [];
+            for (let i = 0, len = targets.length; i < len; i++) {
+                let t = targets[i].toGeoJSONGeometry();
                 targetGeoJSONs.push(t);
             }
             var ret = 'source=' + JSON.stringify(srcGeoJSON);
@@ -160,8 +159,8 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
             ret += '&relation=' + relation;
             return ret;
         }
-        var url = 'http://' + this.getHost() + '/rest/geometry/relation';
-        var queryString = formQueryString();
+        const url = this.getHost() + '/rest/geometry/relation';
+        const queryString = formQueryString();
         maptalks.Ajax.post(
             {
                 url : url
@@ -171,7 +170,7 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
                 if (err) {
                     throw err;
                 }
-                var result = maptalks.Util.parseJSON(resultText);
+                const result = maptalks.Util.parseJSON(resultText);
                 if (!result['success']) {
                     callback['error'](result);
                     return;
@@ -181,4 +180,4 @@ maptalks.Util.extend(maptalks.TopoQuery.prototype, {
             }
         );
     }
-});
+}
