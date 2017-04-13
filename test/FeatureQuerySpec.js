@@ -5,7 +5,7 @@ const expect = (typeof (window) !== 'undefined') ? window.expect : require('expe
 
 describe('FeatureQuery', function () {
     const host = 'localhost';
-    const port = 11215;
+    const port = 8090;
     const mapdb = 'file';
     const layerId = 'layer_using_shapefile';
     describe('query', function () {

@@ -8,6 +8,7 @@ module.exports = {
         'dist/' + pkg.name + '.js',
         //'test/**/*.js'
         'test/DynamicLayerSpec.js',
+        'test/TopoQuerySpec.js',
         { pattern: 'test/resources/*', watched: false, included: false, served: true }
     ],
     proxies: {

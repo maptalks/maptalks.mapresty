@@ -5,7 +5,7 @@ const expect = (typeof (window) !== 'undefined') ? window.expect : require('expe
 
 describe('TopoQuery', function () {
     const host = 'localhost';
-    const port = 11215;
+    const port = 8090;
     describe('query', function () {
         it('buffer', function (done) {
             const distance = 100;
@@ -37,7 +37,6 @@ describe('TopoQuery', function () {
         });
 
         it('relate', function (done) {
-
             const topoQuery = new maptalks.TopoQuery({
                 'host' : host,
                 'port' : port
