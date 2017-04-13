@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 const express = require('express');
-const bodyParser = require('body-parser');
 const PNGImage = require('pngjs-image');
 
 const generateId = obj => {
@@ -11,8 +10,6 @@ const generateId = obj => {
 };
 
 const router = express.Router();
-
-router.use(bodyParser());
 
 router.post('/maps', (req, res) => {
     const ct = req.header('Content-Type');
@@ -29,12 +26,8 @@ router.post('/maps', (req, res) => {
 router.get('/maps/:token/:z/:x/:y.:format', (req, res) => {
     res.type(req.params.format);
     const image = PNGImage.createImage(256, 256);
-    for (let x = 0; x < 100; x++) {
-        for (let y = 0; y < 100; y++) {
-            image.setAt(x, y, { red: 255, green: 0, blue: 0 });
-        }
-    }
-    res.send(image);
+    image.fillRect(0, 0, 100, 100, { red: 255, green: 0, blue: 0 });
+    res.send(image.toBlobSync());
 });
 
 module.exports = router;

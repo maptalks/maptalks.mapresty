@@ -1,12 +1,13 @@
-const gulp = require('gulp'),
-    path = require('path'),
-    pkg = require('./package.json'),
-    BundleHelper = require('maptalks-build-helpers').BundleHelper,
-    TestHelper = require('maptalks-build-helpers').TestHelper;
+const gulp = require('gulp');
+const BundleHelper = require('maptalks-build-helpers').BundleHelper;
+const TestHelper = require('maptalks-build-helpers').TestHelper;
+const http = require('http');
+const requestHandler = require('./test/mapresty/mock');
+const pkg = require('./package.json');
+
 const bundleHelper = new BundleHelper(pkg);
 const testHelper = new TestHelper();
 const karmaConfig = require('./karma.config');
-const Server = require('karma').Server;
 
 gulp.task('build', () => {
     const rollupConfig = bundleHelper.getDefaultRollupConfig();
@@ -22,25 +23,19 @@ gulp.task('watch', ['build'], () => {
     gulp.watch(['index.js', 'src/**/*', './gulpfile.js'], ['build']);
 });
 
-gulp.task('test', ['build'], () => {
+gulp.task('mock', ['build'], () => {
+    const mockServer = http.createServer(requestHandler);
+    mockServer.listen(8090);
+});
+
+gulp.task('test', ['mock'], () => {
     testHelper.test(karmaConfig);
 });
 
-gulp.task('tdd', ['build'], () => {
+gulp.task('tdd', ['mock'], () => {
     karmaConfig.singleRun = false;
     gulp.watch(['index.js', 'src/**/*'], ['test']);
     testHelper.test(karmaConfig);
 });
 
-gulp.task('debug', function (done) {
-    const karmaConfig = {
-        configFile: path.join(__dirname, 'karma.config.js'),
-        browsers: ['Chrome'],
-        singleRun: false
-    };
-    const server = new Server(karmaConfig, done);
-    server.start();
-});
-
 gulp.task('default', ['watch']);
-
