@@ -22,12 +22,16 @@ describe('DynamicLayer', () => {
     });
 
     afterEach(() => {
+        map.remove();
         // document.body.innerHTML = '';
     });
 
-    it('can get tile from server side', () => {
+    it('can get tile from server side', done => {
         const dynamic = new maptalks.DynamicLayer('d', {
             baseUrl: 'http://localhost:8090/dynamic/maps',
+        });
+        dynamic.once('layerload', () => {
+            done();
         });
         map.addLayer(dynamic);
     });
