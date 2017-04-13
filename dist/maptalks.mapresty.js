@@ -71,6 +71,136 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
+var options = {
+    baseUrl: '',
+    format: 'png',
+    layers: [],
+    showOnTileLoadComplete: false
+};
+
+var DynamicLayer = function (_maptalks$TileLayer) {
+    inherits(DynamicLayer, _maptalks$TileLayer);
+
+    /**
+     * Reproduce a DynamicLayer from layer's JSON.
+     * @param  {Object} json - layer's JSON
+     * @return {maptalks.DynamicLayer}
+     * @static
+     * @private
+     * @function
+     */
+    DynamicLayer.fromJSON = function fromJSON(json) {
+        if (!json || json['type'] !== 'DynamicLayer') {
+            return null;
+        }
+        return new DynamicLayer(json['id'], json['options']);
+    };
+
+    function DynamicLayer(id, options) {
+        classCallCheck(this, DynamicLayer);
+
+        //reload时n会增加,改变瓦片请求参数,以刷新浏览器缓存
+        var _this = possibleConstructorReturn(this, _maptalks$TileLayer.call(this, id, options));
+
+        _this.n = 0;
+        return _this;
+    }
+
+    /**
+     * 重新载入动态图层，当改变了图层条件时调用
+     * @expose
+     */
+
+
+    DynamicLayer.prototype.reload = function reload() {
+        this.n += 1;
+        this.load();
+    };
+
+    /**
+     * 载入前的准备, 由父类中的load方法调用
+     */
+
+
+    DynamicLayer.prototype.onAdd = function onAdd() {
+        var _this2 = this;
+
+        var map = this.getMap();
+        if (!this.options.baseUrl) {
+            return false;
+        }
+        //保证在高频率load时，dynamicLayer总能在zoom结束时只调用一次
+        if (this._loadDynamicTimeout) {
+            clearTimeout(this._loadDynamicTimeout);
+        }
+
+        this._loadDynamicTimeout = setTimeout(function () {
+            maptalks.Ajax.post({
+                url: _this2.options.baseUrl,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }, _this2._buildMapConfig(), function (err, response) {
+                if (err) {
+                    throw err;
+                }
+                var result = maptalks.Util.parseJSON(response);
+                if (result && result.token) {
+                    _this2._token = result.token;
+                    _this2._renderer.render(_this2.options.showOnTileLoadComplete);
+                }
+            });
+        }, map.options['zoomAnimationDuration'] + 80);
+        //通知父类先不载入瓦片
+        return false;
+    };
+
+    DynamicLayer.prototype._getTileUrl = function _getTileUrl(x, y, z) {
+        var parts = [];
+        parts.push(this.options.baseUrl);
+        parts.push(this._token);
+        parts.push(z);
+        parts.push(x);
+        parts.push(y + '.' + this.options.format);
+        return parts.join('/');
+    };
+
+    DynamicLayer.prototype._buildMapConfig = function _buildMapConfig() {
+        var map = this.getMap();
+        var view = map.getView();
+        var projection = view.getProjection();
+        var fullExtent = view.getFullExtent();
+        var resolutions = view.getResolutions();
+
+        var mapConfig = {
+            version: '1.0.0',
+            // mandatory: view, optional: center, zoom
+            options: {
+                center: map.getCenter(),
+                zoom: map.getZoom(),
+                view: {
+                    projection: projection.code,
+                    resolutions: resolutions,
+                    fullExtent: [fullExtent.left, fullExtent.bottom, fullExtent.right, fullExtent.top]
+                }
+            },
+            layers: this.options.layers
+        };
+        var maxExtent = map.getMaxExtent();
+        if (maxExtent) {
+            mapConfig.extent = [maxExtent.xmin, maxExtent.ymin, maxExtent.xmax, maxExtent.ymax];
+        }
+
+        return mapConfig;
+    };
+
+    return DynamicLayer;
+}(maptalks.TileLayer);
+
+DynamicLayer.mergeOptions(options);
+
+DynamicLayer.registerJSONType('DynamicLayer');
+
 /**
  * 空间过滤类
  * @class maptalks.SpatialFilter
@@ -171,161 +301,6 @@ maptalks.Util.extend(SpatialFilter, {
    */
   'RELATION_CENTERWITHIN': 102
 });
-
-var options = {
-    baseUrl: '',
-    format: 'png',
-    showOnTileLoadComplete: false
-};
-
-var DynamicLayer = function (_maptalks$TileLayer) {
-    inherits(DynamicLayer, _maptalks$TileLayer);
-
-    /**
-     * Reproduce a DynamicLayer from layer's JSON.
-     * @param  {Object} json - layer's JSON
-     * @return {maptalks.DynamicLayer}
-     * @static
-     * @private
-     * @function
-     */
-    DynamicLayer.fromJSON = function fromJSON(json) {
-        if (!json || json['type'] !== 'DynamicLayer') {
-            return null;
-        }
-        return new DynamicLayer(json['id'], json['options']);
-    };
-
-    function DynamicLayer(id, opts) {
-        classCallCheck(this, DynamicLayer);
-
-        //reload时n会增加,改变瓦片请求参数,以刷新浏览器缓存
-        var _this = possibleConstructorReturn(this, _maptalks$TileLayer.call(this, id, opts));
-
-        _this.n = 0;
-        return _this;
-    }
-
-    /**
-     * 重新载入动态图层，当改变了图层条件时调用
-     * @expose
-     */
-
-
-    DynamicLayer.prototype.reload = function reload() {
-        this.n += 1;
-        this.load();
-    };
-
-    /**
-     * 载入前的准备, 由父类中的load方法调用
-     */
-
-
-    DynamicLayer.prototype.onAdd = function onAdd() {
-        var _this2 = this;
-
-        var map = this.getMap();
-        if (!this.options['layers'] || !this.options['mapdb']) {
-            return false;
-        }
-        //保证在高频率load时，dynamicLayer总能在zoom结束时只调用一次
-        if (this._loadDynamicTimeout) {
-            clearTimeout(this._loadDynamicTimeout);
-        }
-
-        this._loadDynamicTimeout = setTimeout(function () {
-            maptalks.Ajax.post({
-                url: _this2.options['baseUrl'],
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }, _this2._buildMapConfig(), function (err, response) {
-                if (err) {
-                    throw err;
-                }
-                var result = maptalks.Util.parseJSON(response);
-                if (result && result.hasOwnProperty('token')) {
-                    _this2._token = result.token;
-                    _this2._renderer.render(_this2.options.showOnTileLoadComplete);
-                }
-            });
-        }, map.options['zoomAnimationDuration'] + 80);
-        //通知父类先不载入瓦片
-        return false;
-    };
-
-    DynamicLayer.prototype._getTileUrl = function _getTileUrl(x, y, z) {
-        var parts = [];
-        parts.push(this.options['baseUrl']);
-        parts.push(this._token);
-        parts.push(z);
-        parts.push(x);
-        parts.push(y + '.' + this.options.format);
-        return parts.join('/');
-    };
-
-    DynamicLayer.prototype._buildMapConfig = function _buildMapConfig() {
-        var map = this.getMap();
-        var mapConfig = {};
-        mapConfig.version = '1.0.0';
-        mapConfig.extent = map.getMaxExtent();
-        var view = map.getView();
-        mapConfig.options = {
-            'center': map.getCenter(),
-            'zoom': map.getZoom(),
-            'view': view.options
-        };
-        mapConfig.layers = [];
-        for (var i = 0, len = this.options.layers.length; i < len; i++) {
-            var l = this.options.layers[i];
-            var q = {
-                // avoid pass string "undefined" to query service
-                condition: l.condition ? l.condition : '',
-                resultFields: l.fields ? l.fields : ['*']
-            };
-            if (this.options.resultCRS) {
-                q.resultCRS = this.options.resultCRS;
-            } // else, result will be return in layer's CRS
-            if (l.spatialFilter && maptalks.Util.isObject(l.spatialFilter)) {
-                if (l.spatialFilter instanceof SpatialFilter) {
-                    q.spatialFilter = l.spatialFilter.toJSON();
-                } else {
-                    q.spatialFilter = l.spatialFilter;
-                }
-            }
-
-            var layerType = l.type || 'maptalks';
-            var layerOptions = {
-                database: this.options.mapdb,
-                layer: l.table || l.name,
-                queryFilter: q
-            };
-
-            if (layerType !== 'maptalks') {
-                maptalks.Util.extend(layerOptions, l.options || {});
-            } else {
-                maptalks.Util.extend(layerOptions, {
-                    style: l.style ? l.style : {}
-                });
-            }
-
-            var layer = {
-                'id': l.id || l.name,
-                'type': layerType,
-                'options': layerOptions
-            };
-            mapConfig.layers.push(layer);
-        }
-        return mapConfig;
-    };
-
-    return DynamicLayer;
-}(maptalks.TileLayer);
-
-DynamicLayer.mergeOptions(options);
-
-DynamicLayer.registerJSONType('DynamicLayer');
 
 /**
  * 查询类
@@ -517,7 +492,7 @@ var FeatureQuery = function () {
             var spatialFilter = queryFilter['spatialFilter'];
             var filterGeo = spatialFilter['geometry'];
             if (filterGeo) {
-                var paramFilter;
+                var paramFilter = void 0;
                 if (spatialFilter instanceof SpatialFilter) {
                     paramFilter = spatialFilter.toJSON();
                 } else {
@@ -688,8 +663,8 @@ var TopoQuery = function () {
 
     TopoQuery.prototype.relate = function relate(opts, callback) {
         var source = opts['source'];
-        var targets = opts['targets'],
-            relation = opts['relation'];
+        var relation = opts['relation'];
+        var targets = opts['targets'];
         if (targets && !Array.isArray(targets)) {
             targets = [targets];
         }
@@ -793,7 +768,7 @@ maptalks.Map.include({
         * @expose
         */
     snap: function snap(options, callback) {
-        var snapConfig;
+        var snapConfig = void 0;
         if (options.snaps && Array.isArray(options.snaps)) {
             snapConfig = [];
             for (var i = 0, l = options.snaps.length; i < l; i++) {

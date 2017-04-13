@@ -1,9 +1,9 @@
 import * as maptalks from 'maptalks';
-import SpatialFilter from '../query/SpatialFilter';
 
 const options = {
     baseUrl: '',
     format: 'png',
+    layers: [],
     showOnTileLoadComplete: false
 };
 
@@ -24,8 +24,8 @@ export default class DynamicLayer extends maptalks.TileLayer {
         return new DynamicLayer(json['id'], json['options']);
     }
 
-    constructor(id, opts) {
-        super(id, opts);
+    constructor(id, options) {
+        super(id, options);
         //reload时n会增加,改变瓦片请求参数,以刷新浏览器缓存
         this.n = 0;
     }
@@ -44,7 +44,7 @@ export default class DynamicLayer extends maptalks.TileLayer {
      */
     onAdd() {
         const map = this.getMap();
-        if (!this.options['layers'] || !this.options['mapdb']) {
+        if (!this.options.baseUrl) {
             return false;
         }
         //保证在高频率load时，dynamicLayer总能在zoom结束时只调用一次
@@ -55,7 +55,7 @@ export default class DynamicLayer extends maptalks.TileLayer {
         this._loadDynamicTimeout = setTimeout(() => {
             maptalks.Ajax.post(
                 {
-                    url : this.options['baseUrl'],
+                    url : this.options.baseUrl,
                     headers : {
                         'Content-Type' : 'application/json'
                     }
@@ -66,7 +66,7 @@ export default class DynamicLayer extends maptalks.TileLayer {
                         throw err;
                     }
                     const result = maptalks.Util.parseJSON(response);
-                    if (result && result.hasOwnProperty('token')) {
+                    if (result && result.token) {
                         this._token = result.token;
                         this._renderer.render(this.options.showOnTileLoadComplete);
                     }
@@ -79,7 +79,7 @@ export default class DynamicLayer extends maptalks.TileLayer {
 
     _getTileUrl(x, y, z) {
         const parts = [];
-        parts.push(this.options['baseUrl']);
+        parts.push(this.options.baseUrl);
         parts.push(this._token);
         parts.push(z);
         parts.push(x);
@@ -89,56 +89,30 @@ export default class DynamicLayer extends maptalks.TileLayer {
 
     _buildMapConfig() {
         const map = this.getMap();
-        const mapConfig = {};
-        mapConfig.version = '1.0.0';
-        mapConfig.extent = map.getMaxExtent();
         const view = map.getView();
-        mapConfig.options = {
-            'center' : map.getCenter(),
-            'zoom' : map.getZoom(),
-            'view' : view.options
-        };
-        mapConfig.layers = [];
-        for (let i = 0, len = this.options.layers.length; i < len; i++) {
-            const l = this.options.layers[i];
-            const q = {
-                // avoid pass string "undefined" to query service
-                condition: l.condition ? l.condition : '',
-                resultFields: l.fields ? l.fields : ['*']
-            };
-            if (this.options.resultCRS) {
-                q.resultCRS = this.options.resultCRS;
-            } // else, result will be return in layer's CRS
-            if (l.spatialFilter && maptalks.Util.isObject(l.spatialFilter)) {
-                if (l.spatialFilter instanceof SpatialFilter) {
-                    q.spatialFilter = l.spatialFilter.toJSON();
-                } else {
-                    q.spatialFilter = l.spatialFilter;
+        const projection = view.getProjection();
+        const fullExtent = view.getFullExtent();
+        const resolutions = view.getResolutions();
+
+        const mapConfig = {
+            version: '1.0.0',
+            // mandatory: view, optional: center, zoom
+            options: {
+                center: map.getCenter(),
+                zoom: map.getZoom(),
+                view: {
+                    projection: projection.code,
+                    resolutions: resolutions,
+                    fullExtent: [fullExtent.left, fullExtent.bottom, fullExtent.right, fullExtent.top]
                 }
-            }
-
-            const layerType = l.type || 'maptalks';
-            const layerOptions = {
-                database: this.options.mapdb,
-                layer: l.table || l.name,
-                queryFilter: q
-            };
-
-            if (layerType !== 'maptalks') {
-                maptalks.Util.extend(layerOptions, l.options || {});
-            } else {
-                maptalks.Util.extend(layerOptions, {
-                    style: l.style ? l.style : {}
-                });
-            }
-
-            const layer = {
-                'id'      : l.id || l.name,
-                'type'    : layerType,
-                'options' : layerOptions
-            };
-            mapConfig.layers.push(layer);
+            },
+            layers: this.options.layers
+        };
+        const maxExtent = map.getMaxExtent();
+        if (maxExtent) {
+            mapConfig.extent = [maxExtent.xmin, maxExtent.ymin, maxExtent.xmax, maxExtent.ymax];
         }
+
         return mapConfig;
     }
 }

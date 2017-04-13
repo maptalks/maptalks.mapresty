@@ -1,16 +1,22 @@
-/* eslint-env mocha */
+const http = require('http');
+const express = require('express');
+const router = require('./mapresty/routes/dynamic');
 
-describe('DynamicLayer', function () {
-
+describe('DynamicLayer', () => {
+    let server;
     let container;
     let map;
-    const p1 = [110.582514, 27.87486003];
-    const p2 = [110.6846798, 28.00622502];
-    let c = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
-    c = [121.359403, 31.232223];
-    const center = new maptalks.Coordinate(c);
+    const coords = [121.359403, 31.232223];
+    const center = new maptalks.Coordinate(coords);
 
-    beforeEach(function () {
+    before(() => {
+        const app = express();
+        app.use(router);
+        server = http.createServer(app);
+        server.listen(0);
+    });
+
+    beforeEach(() => {
         container = document.createElement('div');
         container.style.width = '512px';
         container.style.height = '512px';
@@ -29,28 +35,18 @@ describe('DynamicLayer', function () {
         map.setBaseLayer(tile);
     });
 
-    afterEach(function () {
+    afterEach(() => {
         // document.body.innerHTML = '';
     });
 
-    it('layer-type-maptalks', function () {
+    after(() => {
+        server.close();
+    });
+
+    it('can get tile from server side', () => {
+        const port = server.address().port;
         const dynamic = new maptalks.DynamicLayer('d', {
-            baseUrl: 'http://localhost:11216/maps',
-            mapdb: 'mysql_chinamap_maptalks',
-            // resultCRS: maptalks.CRS.createProj4('+proj=longlat +datum=GCJ02'),
-            resultCRS: 'GCJ02',
-            layers: [{
-                name: 'country_point',
-                condition: 'name like \'%乡\'',
-                fields: ['name', 'kind'],
-                style: {
-                    symbol: {
-                        'markerType'   : 'ellipse',
-                        'markerWidth'  : 4,
-                        'markerHeight' : 4
-                    }
-                }
-            }]
+            baseUrl: `http://localhost:${port}/maps`,
         });
         map.addLayer(dynamic);
     });
