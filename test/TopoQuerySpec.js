@@ -1,8 +1,5 @@
 'use strict';
 
-const maptalks = (typeof (window) !== 'undefined') ? window.maptalks : require('maptalks');
-const expect = (typeof (window) !== 'undefined') ? window.expect : require('expect.js');
-
 describe('TopoQuery', function () {
     const host = 'localhost';
     const port = 8090;

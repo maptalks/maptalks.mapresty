@@ -1,15 +1,12 @@
 'use strict';
 
-const maptalks = (typeof (window) !== 'undefined') ? window.maptalks : require('maptalks');
-const expect = (typeof (window) !== 'undefined') ? window.expect : require('expect.js');
-
 describe('FeatureQuery', function () {
     const host = 'localhost';
     const port = 8090;
     const mapdb = 'file';
     const layerId = 'layer_using_shapefile';
     describe('query', function () {
-        it('no return geometry', function (done) {
+        it.skip('no return geometry', function (done) {
             const featureQuery = new maptalks.FeatureQuery({
                 'host' : host,
                 'port' : port,
@@ -42,7 +39,7 @@ describe('FeatureQuery', function () {
             );
         });
 
-        it('filter with condition', function (done) {
+        it.skip('filter with condition', function (done) {
             const featureQuery = new maptalks.FeatureQuery({
                 'host' : host,
                 'port' : port,
@@ -68,7 +65,7 @@ describe('FeatureQuery', function () {
             );
         });
 
-        it('return parts of fields', function (done) {
+        it.skip('return parts of fields', function (done) {
             const featureQuery = new maptalks.FeatureQuery({
                 'host' : host,
                 'port' : port,
@@ -98,7 +95,7 @@ describe('FeatureQuery', function () {
             );
         });
 
-        it('can return no fields', function (done) {
+        it.skip('can return no fields', function (done) {
             const featureQuery = new maptalks.FeatureQuery({
                 'host' : host,
                 'port' : port,
@@ -127,7 +124,7 @@ describe('FeatureQuery', function () {
             );
         });
 
-        it('can filter by spatial filter', function (done) {
+        it.skip('can filter by spatial filter', function (done) {
             const featureQuery = new maptalks.FeatureQuery({
                 'host' : host,
                 'port' : port,
@@ -156,7 +153,7 @@ describe('FeatureQuery', function () {
             );
         });
 
-        it('can have different coordinate types', function (done) {
+        it.skip('can have different coordinate types', function (done) {
             const featureQuery = new maptalks.FeatureQuery({
                 'host' : host,
                 'port' : port,
@@ -195,12 +192,11 @@ describe('FeatureQuery', function () {
                             done();
                         }
                     );
-                });
+                }
+            );
         });
 
-
-
-        it('identify default spatial database', function (done) {
+        it.skip('identify default spatial database', function (done) {
             const featureQuery = new maptalks.FeatureQuery({
                 'host' : host,
                 'port' : port,
@@ -222,6 +218,50 @@ describe('FeatureQuery', function () {
                     done();
                 }
             );
+        });
+
+        it('query', done => {
+            const featureQuery = new maptalks.FeatureQuery({
+                'host' : host,
+                'port' : port,
+                'mapdb': mapdb
+            });
+            const count = 10;
+            const layerId = 'test-query';
+            featureQuery.query({
+                page: 0,
+                count: count,
+                layer: layerId,
+                queryFilter: {
+                }
+            }, (err, collections) => {
+                if (err) throw err;
+                const features = collections[0].features;
+                expect(features.length === count);
+                done();
+            });
+        });
+
+        it('identify', done => {
+            const featureQuery = new maptalks.FeatureQuery({
+                'host' : host,
+                'port' : port,
+                'mapdb': mapdb
+            });
+            const layerId = 'test-identify';
+            featureQuery.identify({
+                layer: layerId,
+                coordinate: [120, 30],
+                radius: 500
+            }, (err, collections) => {
+                if (err) throw err;
+                const features = collections[0].features;
+                expect(features.length === 1);
+                done();
+            });
+        });
+
+        it.skip('formQueryString', () => {
         });
 
     });

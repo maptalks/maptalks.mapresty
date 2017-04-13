@@ -19,8 +19,8 @@ const checkBody = (req, names) => {
     });
 };
 
-router.post('/sdb/databases/:db/layers/:layer/data', function (req, res) {
-    const names = ['mapdb', 'encoding'];
+const handleQuery = (req, res) => {
+    const names = ['mapdb', 'encoding', 'page', 'count', 'condition'];
     const checkQuery = req => {
         const query = req.query;
         return query.op && query.op === 'query';
@@ -33,31 +33,83 @@ router.post('/sdb/databases/:db/layers/:layer/data', function (req, res) {
         res.send({ success: false });
         return;
     }
+    const body = req.body;
+    const count = body.count || 20;
     const features = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < count; i++) {
         features.push({
-            'type' : 'Feature',
-            'geometry' : {
-                'type' : 'Point',
-                'coordinates' : [100 + Math.random() * 10, 50 + Math.random() * 10]
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [100 + Math.random() * 10, 50 + Math.random() * 10]
             },
-            'properties' : {
-                'foo' :' test'
+            properties: {
+                idx: i
             }
         });
     }
     const response = {
-        'success'   : true,
-        'count'     : 1,
-        'data'      : [
-            {
-                'type' : 'FeatureCollection',
-                'layer' : req.params.layer,
-                'features' : features
-            }
-        ]
+        success: true,
+        count: 1,
+        data: [{
+            type: 'FeatureCollection',
+            layer: req.params.layer,
+            features: features
+        }]
     };
     res.send(response);
+    res.end();
+};
+
+const handleIdentify = (req, res) => {
+    const names = ['mapdb', 'encoding', 'page', 'count', 'spatialFilter'];
+    const checkQuery = req => {
+        const query = req.query;
+        return query.op && query.op === 'query';
+    };
+    const check = req => {
+        return checkQuery(req) && checkContentType(req) && checkBody(req, names);
+    };
+    if (!check(req)) {
+        // res.status(422);
+        res.send({ success: false });
+        return;
+    }
+    const body = req.body;
+    const count = body.count;
+    const features = [];
+    for (let i = 0; i < count; i++) {
+        features.push({
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [100 + Math.random() * 10, 50 + Math.random() * 10]
+            },
+            properties: {
+                idx: i
+            }
+        });
+    }
+    const response = {
+        success: true,
+        count: 1,
+        data: [{
+            type: 'FeatureCollection',
+            layer: req.params.layer,
+            features: features
+        }]
+    };
+    res.send(response);
+    res.end();
+};
+
+router.post('/sdb/databases/:db/layers/:layer/data', function (req, res) {
+    const layerId = req.params.layer;
+    if (layerId === 'test-query') {
+        handleQuery(req, res);
+    } else {
+        handleIdentify(req, res);
+    }
 });
 
 router.post('/geometry/relation', function (req, res) {

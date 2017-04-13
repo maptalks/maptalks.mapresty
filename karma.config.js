@@ -6,9 +6,10 @@ module.exports = {
     files: [
         'node_modules/maptalks/dist/maptalks.js',
         'dist/' + pkg.name + '.js',
-        //'test/**/*.js'
+        // 'test/**/*.js'
         'test/DynamicLayerSpec.js',
         'test/TopoQuerySpec.js',
+        'test/FeatureQuerySpec.js',
         { pattern: 'test/resources/*', watched: false, included: false, served: true }
     ],
     proxies: {
