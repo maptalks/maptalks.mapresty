@@ -3,8 +3,7 @@ import * as maptalks from 'maptalks';
 const options = {
     baseUrl: '',
     format: 'png',
-    layers: [],
-    showOnTileLoadComplete: false
+    layers: []
 };
 
 export default class DynamicLayer extends maptalks.TileLayer {
@@ -28,6 +27,7 @@ export default class DynamicLayer extends maptalks.TileLayer {
         super(id, options);
         //reload时n会增加,改变瓦片请求参数,以刷新浏览器缓存
         this.n = 0;
+        this._ready = false;
     }
 
     /**
@@ -42,11 +42,17 @@ export default class DynamicLayer extends maptalks.TileLayer {
     /**
      * 载入前的准备, 由父类中的load方法调用
      */
-    onAdd() {
+    onLoad() {
         const map = this.getMap();
+
         if (!this.options.baseUrl) {
             return false;
         }
+
+        if (this._ready) {
+            return true;
+        }
+
         //保证在高频率load时，dynamicLayer总能在zoom结束时只调用一次
         if (this._loadDynamicTimeout) {
             clearTimeout(this._loadDynamicTimeout);
@@ -68,16 +74,17 @@ export default class DynamicLayer extends maptalks.TileLayer {
                     const result = maptalks.Util.parseJSON(response);
                     if (result && result.token) {
                         this._token = result.token;
-                        this._renderer.render(this.options.showOnTileLoadComplete);
+                        this._ready = true;
+                        this.load();
                     }
                 }
             );
         }, map.options['zoomAnimationDuration'] + 80);
-        //通知父类先不载入瓦片
+
         return false;
     }
 
-    _getTileUrl(x, y, z) {
+    getTileUrl(x, y, z) {
         const parts = [];
         parts.push(this.options.baseUrl);
         parts.push(this._token);
@@ -89,7 +96,7 @@ export default class DynamicLayer extends maptalks.TileLayer {
 
     _buildMapConfig() {
         const map = this.getMap();
-        const view = map.getView();
+        const view = map.getSpatialReference();
         const projection = view.getProjection();
         const fullExtent = view.getFullExtent();
         const resolutions = view.getResolutions();

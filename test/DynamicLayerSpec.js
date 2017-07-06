@@ -23,7 +23,7 @@ describe('DynamicLayer', () => {
 
     afterEach(() => {
         map.remove();
-        // document.body.innerHTML = '';
+        maptalks.DomUtil.removeDomNode(container);
     });
 
     it('can get tile from server side', done => {
