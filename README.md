@@ -32,7 +32,7 @@ featureQuery.query({
     'queryFilter': {
         'returnGeometry': true,
         'spatialFilter' : spatialFilter, // spatialFilter
-        
+
         //maptalks.CRS.GCJ02, maptalks.CRS.EPSG4490, maptalks.CRS.EPSG3857, maptalks.CRS.EPSG4326
         'resultCRS': maptalks.CRS.BD09LL,
         'condition': cond,      //properties condition
@@ -73,7 +73,7 @@ topo.buffer({
     'distance'   : 100      //buffer distance, in meters
 },function(err, data) {
     if (err) {
-        alert('error when querying relation', err);
+        alert('error when querying buffer', err);
         return;
     }
     //....
