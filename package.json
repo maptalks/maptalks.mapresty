@@ -1,6 +1,6 @@
 {
   "name": "maptalks.mapresty",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A MapResty's client for maptalks.js.",
   "license": "MIT",
   "repository": {
@@ -17,12 +17,12 @@
     "dist"
   ],
   "scripts": {
-    "build" : "gulp minify",
+    "build": "gulp minify",
     "lint": "eslint .",
     "test": "gulp test",
-    "tdd" : "gulp tdd",
-    "dev" : "gulp watch",
-    "preversion" : "npm test",
+    "tdd": "gulp tdd",
+    "dev": "gulp watch",
+    "preversion": "npm test",
     "pretest": "npm run lint",
     "prepublish": "npm test && gulp minify"
   },
