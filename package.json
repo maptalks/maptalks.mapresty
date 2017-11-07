@@ -17,6 +17,7 @@
     "dist"
   ],
   "scripts": {
+    "build" : "gulp minify",
     "lint": "eslint .",
     "test": "gulp test",
     "tdd" : "gulp tdd",
