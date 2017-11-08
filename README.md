@@ -8,7 +8,7 @@ A MapResty's client for maptalks.js.
 ## Examples
 
 ### Usage
-## In Browser
+#### In Browser
 ```html
 <script type="text/javascript" src="path/to/maptalks.js"></script>
 <script type="text/javascript" src="path/to/maptalks.mapresty.js"></script>
@@ -19,7 +19,7 @@ var featureQuery = new maptalks.FeatureQuery({
 </script>
 ```
 
-## ES Modules
+#### ES Modules
 ```js
 import * as maptalks from 'maptalks';
 //plugin's classes should be imported directly like
