@@ -7,6 +7,36 @@ A MapResty's client for maptalks.js.
 
 ## Examples
 
+### Usage
+## In Browser
+```html
+<script type="text/javascript" src="path/to/maptalks.js"></script>
+<script type="text/javascript" src="path/to/maptalks.mapresty.js"></script>
+<script type="text/javascript">
+var featureQuery = new maptalks.FeatureQuery({
+    //...
+});
+</script>
+```
+
+## ES Modules
+```js
+import * as maptalks from 'maptalks';
+//plugin's classes should be imported directly like
+import { FeatureQuery, SpatialFilter } from 'maptalks.mapresty';
+
+const filter = new SpatialFilter(
+    geometry, 
+    SpatialFilter['RELATION_INTERSECT'], 
+    maptalks.CRS.BD09LL
+);
+
+const featureQuery = new FeatureQuery({
+    spatialFilter : filter,
+    //...
+});
+```
+
 ### Feature Query
 ```javascript
 var featureQuery = new maptalks.FeatureQuery({
