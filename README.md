@@ -67,8 +67,29 @@ featureQuery.query({
         'resultCRS': maptalks.CRS.BD09LL,
         'condition': cond,      //properties condition
         'resultFields': ['*']   //fields to return，['*'] means all the fields
-    }
+    },
+    //additional url parameters
+    'urlParamters' : 'token=xxxx'
 },function(err, data) {
+    if (err) {
+        alert('error when querying data', err);
+        return;
+    }
+    //....
+});
+
+//count data
+featureQuery.count({
+    'page' : 0,
+    'count': 100,
+    'layer': ['layer1', 'layer2'],
+    'queryFilter': {
+        'spatialFilter' : spatialFilter, // spatialFilter
+        'condition': cond,      //properties condition
+    },
+    //additional url parameters
+    'urlParamters' : 'token=xxxx'
+},function(err, count) {
     if (err) {
         alert('error when querying data', err);
         return;
