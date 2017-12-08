@@ -67,12 +67,7 @@ export default class FeatureQuery {
         return this;
     }
 
-    /**
-     * query
-     * @param  {Object} opts 查询参数
-     * @expose
-     */
-    query(opts, callback) {
+    _postQuery(queryString, opts, onsuccess, onerror) {
         if (!opts || !this.check()) {
             throw new Error('invalid options for FeatureQuery\'s query method.');
         }
@@ -95,7 +90,11 @@ export default class FeatureQuery {
             layer = segs.join(',');
         }
         //•/databases/{db}/layers/{id}/data?op=query
-        const url = this.getHost() + '/rest/sdb/databases/' + this.mapdb + '/layers/' + layer + '/data?op=query';
+        let url = this.getHost() + '/rest/sdb/databases/' + this.mapdb + '/layers/' + layer + '/data?' + queryString;
+        if (opts['urlParameters']) {
+            url += '&' + opts['urlParameters'];
+        }
+
         let queryFilter = opts['queryFilter'];
         if (!queryFilter) {
             //默认的queryFilter
@@ -123,7 +122,7 @@ export default class FeatureQuery {
                 if (!response) {
                     //20000是未知错误的错误代码
                     if (maptalks.Util.isFunction(opts['error'])) {
-                        callback({ 'success':false, 'errCode':maptalks.Constant.ERROR_CODE_UNKNOWN, 'error':'' });
+                        onerror({ 'success':false, 'errCode':maptalks.Constant.ERROR_CODE_UNKNOWN, 'error':'' });
                     }
                     return;
                 }
@@ -131,38 +130,60 @@ export default class FeatureQuery {
                 if (!result) {
                     //20000是未知错误的错误代码
                     if (maptalks.Util.isFunction(opts['error'])) {
-                        callback({ 'success':false, 'errCode':maptalks.Constant.ERROR_CODE_UNKNOWN, 'error':'' });
+                        onerror({ 'success':false, 'errCode':maptalks.Constant.ERROR_CODE_UNKNOWN, 'error':'' });
                     }
                 } else if (!result['success']) {
-                    callback(result);
+                    onerror(result);
                 } else {
-                    const datas = result['data'];
-                    if (!datas || datas.length === 0) {
-                        callback(null, []);
-                    } else {
-                        const collections = [];
-                        if (queryFilter['returnGeometry'] === false) {
-                            for (let i = 0, len = datas.length; i < len; i++) {
-                                collections.push({
-                                    'layer' : datas[i]['layer'],
-                                    'features' : datas[i]['features']
-                                });
-                            }
-                            //不返回Geometry,直接返回属性数据
-                            callback(null, collections);
-                        } else {
-                            for (let i = 0, len = datas.length; i < len; i++) {
-                                collections.push({
-                                    'layer' : datas[i]['layer'],
-                                    'features' : maptalks.GeoJSON.toGeometry(datas[i]['features'])
-                                });
-                            }
-                            callback(null, collections);
-                        }
-                    }
+                    onsuccess(result, queryFilter);
                 }
             }
         );
+    }
+
+    /**
+     * Query count
+     * @param {Object} opts query condition
+     * @param {Function} callback
+     */
+    count(opts, callback) {
+        this._postQuery('op=count', opts, result => {
+            callback(null, result['data']);
+        }, callback);
+    }
+
+    /**
+     * query
+     * @param  {Object} opts 查询参数
+     * @expose
+     */
+    query(opts, callback) {
+        this._postQuery('op=query', opts, (result, queryFilter) => {
+            const datas = result['data'];
+            if (!datas || datas.length === 0) {
+                callback(null, []);
+            } else {
+                const collections = [];
+                if (queryFilter['returnGeometry'] === false) {
+                    for (let i = 0, len = datas.length; i < len; i++) {
+                        collections.push({
+                            'layer' : datas[i]['layer'],
+                            'features' : datas[i]['features']
+                        });
+                    }
+                    //不返回Geometry,直接返回属性数据
+                    callback(null, collections);
+                } else {
+                    for (let i = 0, len = datas.length; i < len; i++) {
+                        collections.push({
+                            'layer' : datas[i]['layer'],
+                            'features' : maptalks.GeoJSON.toGeometry(datas[i]['features'])
+                        });
+                    }
+                    callback(null, collections);
+                }
+            }
+        }, callback);
     }
 
     /**
