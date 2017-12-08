@@ -109,7 +109,8 @@ var topo = new maptalks.TopoQuery({
 topo.relate({
     'source' : sourceGeo,     //source
     'targets' : [targetGeo],  //geometries to query relation
-    'relation'   : SpatialFilter['RELATION_INTERSECT'] //relation
+    'relation'   : SpatialFilter['RELATION_INTERSECT'], //relation
+    'urlParamters' : 'token=xxxx'
 }, function (err, data) {
     if (err) {
         alert('error when querying relation', err);
@@ -121,7 +122,8 @@ topo.relate({
 //query buffer of geometries
 topo.buffer({
     'geometries' : [geometry],
-    'distance'   : 100      //buffer distance, in meters
+    'distance'   : 100,      //buffer distance, in meters
+    'urlParamters' : 'token=xxxx'
 },function(err, data) {
     if (err) {
         alert('error when querying buffer', err);
