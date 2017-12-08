@@ -68,6 +68,9 @@ export default class TopoQuery {
         function formQueryString() {
             let ret = 'distance=' + distance;
             ret += '&targets=' + encodeURIComponent(JSON.stringify(targets));
+            if (opts['urlParameters']) {
+                ret += '&' + opts['urlParameters'];
+            }
             return ret;
         }
         function bufferPointOrCircle(p) {
@@ -157,6 +160,9 @@ export default class TopoQuery {
             let ret = 'source=' + JSON.stringify(srcGeoJSON);
             ret += '&targets=' + JSON.stringify(targetGeoJSONs);
             ret += '&relation=' + relation;
+            if (opts['urlParameters']) {
+                ret += '&' + opts['urlParameters'];
+            }
             return ret;
         }
         const url = this.getHost() + '/rest/geometry/relation';
