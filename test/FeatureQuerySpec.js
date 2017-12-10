@@ -261,6 +261,24 @@ describe('FeatureQuery', function () {
             });
         });
 
+        it('count', done => {
+            const featureQuery = new maptalks.FeatureQuery({
+                'host' : host,
+                'port' : port,
+                'mapdb': mapdb
+            });
+            const layerId = 'test-identify';
+            featureQuery.count({
+                layer: layerId,
+                queryFilter: {
+                }
+            }, (err, data) => {
+                if (err) throw err;
+                expect(data === 5);
+                done();
+            });
+        });
+
         it.skip('formQueryString', () => {
         });
 

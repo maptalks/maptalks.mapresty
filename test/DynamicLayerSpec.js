@@ -26,7 +26,7 @@ describe('DynamicLayer', () => {
         maptalks.DomUtil.removeDomNode(container);
     });
 
-    it('can get tile from server side', done => {
+    it.skip('can get tile from server side', done => {
         const dynamic = new maptalks.DynamicLayer('d', {
             baseUrl: 'http://localhost:8090/dynamic/maps',
         });

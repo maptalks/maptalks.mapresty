@@ -105,10 +105,20 @@ const handleIdentify = (req, res) => {
 
 router.post('/sdb/databases/:db/layers/:layer/data', function (req, res) {
     const layerId = req.params.layer;
-    if (layerId === 'test-query') {
-        handleQuery(req, res);
-    } else {
-        handleIdentify(req, res);
+    const op = req.query.op;
+    if (op === 'query') {
+        if (layerId === 'test-query') {
+            handleQuery(req, res);
+        } else {
+            handleIdentify(req, res);
+        }
+    } else if (op === 'count') {
+        const response = {
+            success: true,
+            data: 5
+        };
+        res.send(response);
+        res.end();
     }
 });
 
