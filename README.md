@@ -80,8 +80,6 @@ featureQuery.query({
 
 //count data
 featureQuery.count({
-    'page' : 0,
-    'count': 100,
     'layer': ['layer1', 'layer2'],
     'queryFilter': {
         'spatialFilter' : spatialFilter, // spatialFilter
