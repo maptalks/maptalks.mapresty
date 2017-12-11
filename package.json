@@ -1,6 +1,6 @@
 {
   "name": "maptalks.mapresty",
-  "version": "0.2.1",
+  "version": "0.3.0-alpha.0",
   "description": "A MapResty's client for maptalks.js.",
   "license": "MIT",
   "repository": {
