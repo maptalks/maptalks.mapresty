@@ -69,7 +69,7 @@ featureQuery.query({
         'resultFields': ['*']   //fields to return，['*'] means all the fields
     },
     //additional url parameters
-    'urlParamters' : 'token=xxxx'
+    'urlParameters' : 'token=xxxx'
 },function(err, data) {
     if (err) {
         alert('error when querying data', err);
@@ -86,7 +86,7 @@ featureQuery.count({
         'condition': cond,      //properties condition
     },
     //additional url parameters
-    'urlParamters' : 'token=xxxx'
+    'urlParameters' : 'token=xxxx'
 },function(err, count) {
     if (err) {
         alert('error when querying data', err);
@@ -108,7 +108,7 @@ topo.relate({
     'source' : sourceGeo,     //source
     'targets' : [targetGeo],  //geometries to query relation
     'relation'   : SpatialFilter['RELATION_INTERSECT'], //relation
-    'urlParamters' : 'token=xxxx'
+    'urlParameters' : 'token=xxxx'
 }, function (err, data) {
     if (err) {
         alert('error when querying relation', err);
@@ -121,7 +121,7 @@ topo.relate({
 topo.buffer({
     'geometries' : [geometry],
     'distance'   : 100,      //buffer distance, in meters
-    'urlParamters' : 'token=xxxx'
+    'urlParameters' : 'token=xxxx'
 },function(err, data) {
     if (err) {
         alert('error when querying buffer', err);
